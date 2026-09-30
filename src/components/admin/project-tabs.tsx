@@ -7,6 +7,7 @@ const tabs = [
   { value: "ringkasan", label: "Ringkasan" },
   { value: "sprint", label: "Sprint & Task" },
   { value: "pesan", label: "Pesan" },
+  { value: "invoice", label: "Invoice" },
 ] as const;
 
 export type ProjectTab = (typeof tabs)[number]["value"];
@@ -38,7 +39,7 @@ export function ProjectTabs({ initialTab, panels }: ProjectTabsProps) {
     <Tabs value={active} onValueChange={change} className="gap-6">
       <TabsList className="w-full sm:w-fit">
         {tabs.map((tab) => (
-          <TabsTrigger key={tab.value} value={tab.value} className="px-4">
+          <TabsTrigger key={tab.value} value={tab.value} className="sm:px-4">
             {tab.label}
           </TabsTrigger>
         ))}

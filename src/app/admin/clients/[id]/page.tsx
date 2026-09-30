@@ -5,8 +5,10 @@ import { ClientProjectsTab } from "@/components/admin/clients/client-projects-ta
 import { ClientRequestsTab } from "@/components/admin/clients/client-requests-tab";
 import { ClientTabs } from "@/components/admin/clients/client-tabs";
 import { ClientWebsitesTab } from "@/components/admin/clients/client-websites-tab";
+import { ClientInvoicesTab } from "@/components/admin/invoices/client-invoices-tab";
 import { PageHeader } from "@/components/shared/page-header";
 import { getClientDetail } from "@/lib/clients";
+import { listInvoices } from "@/lib/invoice-queries";
 import { navLabels } from "@/lib/labels";
 import { requireAdmin } from "@/lib/rbac";
 import { listRequests } from "@/lib/requests";
@@ -16,7 +18,10 @@ export default async function ClientDetailPage({ params, searchParams }: PagePro
   const [{ id }, { tab }] = await Promise.all([params, searchParams]);
   const client = await getClientDetail(id);
   if (!client) notFound();
-  const requests = await listRequests({ clientId: client.id });
+  const [requests, invoices] = await Promise.all([
+    listRequests({ clientId: client.id }),
+    listInvoices({ project: { clientId: client.id } }),
+  ]);
 
   const tabs = [
     {
@@ -33,6 +38,11 @@ export default async function ClientDetailPage({ params, searchParams }: PagePro
       value: "permintaan",
       label: `Permintaan (${requests.length})`,
       content: <ClientRequestsTab requests={requests} />,
+    },
+    {
+      value: "invoice",
+      label: `Invoice (${invoices.length})`,
+      content: <ClientInvoicesTab clientId={client.id} invoices={invoices} />,
     },
     {
       value: "akun",

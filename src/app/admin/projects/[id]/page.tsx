@@ -1,9 +1,11 @@
 import { notFound } from "next/navigation";
+import { ProjectInvoicesTab } from "@/components/admin/invoices/project-invoices-tab";
 import { ProjectOverview } from "@/components/admin/project-overview";
 import { type ProjectTab, ProjectTabs } from "@/components/admin/project-tabs";
 import { SprintList } from "@/components/admin/sprint-list";
 import { MessageThread } from "@/components/shared/message-thread";
 import { PageHeader } from "@/components/shared/page-header";
+import { listInvoices } from "@/lib/invoice-queries";
 import { navLabels, projectTypeLabels } from "@/lib/labels";
 import { getProjectMessages } from "@/lib/messages";
 import { prisma } from "@/lib/prisma";
@@ -11,7 +13,7 @@ import { projectProgress } from "@/lib/progress";
 import { requireAdmin } from "@/lib/rbac";
 
 function parseTab(value: unknown): ProjectTab {
-  return value === "sprint" || value === "pesan" ? value : "ringkasan";
+  return value === "sprint" || value === "pesan" || value === "invoice" ? value : "ringkasan";
 }
 
 export default async function AdminProjectDetailPage({ params, searchParams }: PageProps<"/admin/projects/[id]">) {
@@ -34,6 +36,7 @@ export default async function AdminProjectDetailPage({ params, searchParams }: P
   if (!project) notFound();
 
   const messages = await getProjectMessages(id);
+  const invoices = await listInvoices({ projectId: id });
   const progress = projectProgress(project);
   const allTasks = project.sprints.flatMap((sprint) => sprint.tasks);
   const taskCount = allTasks.length;
@@ -67,6 +70,7 @@ export default async function AdminProjectDetailPage({ params, searchParams }: P
               description={`Diskusi dengan ${project.client.company}. Klien mendapat notifikasi setiap ada pesan baru.`}
             />
           ),
+          invoice: <ProjectInvoicesTab projectId={project.id} invoices={invoices} />,
         }}
       />
     </>
