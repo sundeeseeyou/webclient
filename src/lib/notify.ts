@@ -6,6 +6,7 @@ export type NotificationType =
   | "REQUEST_UPDATED"
   | "INVOICE_SENT"
   | "WAITING_APPROVAL"
+  | "PROJECT_APPROVED"
   | "RENEWAL_REMINDER";
 
 export type NotificationInput = {

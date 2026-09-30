@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { ProjectApproval } from "@/components/portal/project-approval";
 import { progressSentence, projectStatusNotes } from "@/components/portal/project-text";
 import { SprintSummary } from "@/components/portal/sprint-summary";
 import { MessageThread } from "@/components/shared/message-thread";
@@ -50,6 +51,7 @@ export default async function PortalProjectDetailPage({ params }: PageProps<"/po
         description={`${project.website?.domain ?? "Tanpa website"} · ${projectTypeLabels[project.type]}`}
         breadcrumbs={[{ label: navLabels.projects, href: "/portal/projects" }, { label: project.name }]}
       />
+      {project.status === "WAITING_APPROVAL" && <ProjectApproval projectId={project.id} />}
       <div className="grid gap-6 xl:grid-cols-5">
         <div className="min-w-0 space-y-6 xl:col-span-2">
           <Card>
@@ -74,6 +76,12 @@ export default async function PortalProjectDetailPage({ params }: PageProps<"/po
                   <dt className="text-xs text-muted-foreground">Target selesai</dt>
                   <dd className="mt-1">{project.endDate ? formatDate(project.endDate) : "Belum ditentukan"}</dd>
                 </div>
+                {project.status === "DONE" && project.approvedAt && (
+                  <div className="col-span-2">
+                    <dt className="text-xs text-muted-foreground">Persetujuan</dt>
+                    <dd className="mt-1">Disetujui pada {formatDate(project.approvedAt)}</dd>
+                  </div>
+                )}
               </dl>
               {project.description && <p className="border-t pt-4 whitespace-pre-line text-muted-foreground">{project.description}</p>}
             </CardContent>
