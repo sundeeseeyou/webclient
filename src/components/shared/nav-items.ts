@@ -24,6 +24,7 @@ export const navItems: Record<Portal, NavItem[]> = {
   portal: [
     { href: "/portal", label: navLabels.dashboard, icon: PiSquaresFour },
     { href: "/portal/projects", label: navLabels.projects, icon: PiKanban },
+    { href: "/portal/requests", label: navLabels.requests, icon: PiTray },
     { href: "/portal/reports", label: navLabels.reports, icon: PiFileText },
   ],
 };
