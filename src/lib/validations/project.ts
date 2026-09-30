@@ -68,6 +68,4 @@ export const messageSchema = z.object({
 });
 
 export type ProjectInput = z.input<typeof projectSchema>;
-export type SprintInput = z.input<typeof sprintSchema>;
-export type TaskInput = z.input<typeof taskSchema>;
-export type MessageInput = z.input<typeof messageSchema>;
+export type ProjectValues = z.output<typeof projectSchema>;
