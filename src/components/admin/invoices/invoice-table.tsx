@@ -10,7 +10,7 @@ import { invoiceStatusTone } from "@/lib/status-tones";
 
 type InvoiceTableProps = {
   invoices: InvoiceListItem[];
-  // Kolom klien/proyek disembunyikan bila tabel sudah berada di halaman klien/proyek tersebut.
+  // Nama klien/proyek disembunyikan bila tabel sudah berada di halaman klien/proyek tersebut.
   showClient?: boolean;
   showProject?: boolean;
 };
@@ -22,8 +22,7 @@ export function InvoiceTable({ invoices, showClient = true, showProject = true }
         <TableHeader>
           <TableRow className="bg-muted/40 hover:bg-muted/40">
             <TableHead>Nomor</TableHead>
-            {showClient && <TableHead>Klien</TableHead>}
-            {showProject && <TableHead>Proyek</TableHead>}
+            {showProject && <TableHead>{showClient ? "Klien & proyek" : "Proyek"}</TableHead>}
             <TableHead>Terbit</TableHead>
             <TableHead>Jatuh tempo</TableHead>
             <TableHead className="text-right">Total</TableHead>
@@ -40,8 +39,12 @@ export function InvoiceTable({ invoices, showClient = true, showProject = true }
                     {invoice.number}
                   </Link>
                 </TableCell>
-                {showClient && <TableCell>{invoice.project.client.company}</TableCell>}
-                {showProject && <TableCell className="min-w-48 whitespace-normal">{invoice.project.name}</TableCell>}
+                {showProject && (
+                  <TableCell className="min-w-52 whitespace-normal">
+                    {showClient && <p>{invoice.project.client.company}</p>}
+                    <p className={showClient ? "text-xs text-muted-foreground" : undefined}>{invoice.project.name}</p>
+                  </TableCell>
+                )}
                 <TableCell>{formatDate(invoice.issuedDate)}</TableCell>
                 <TableCell>{formatDate(invoice.dueDate)}</TableCell>
                 <TableCell className="text-right tabular-nums">{formatRupiah(invoice.amount)}</TableCell>

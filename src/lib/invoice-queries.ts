@@ -47,7 +47,8 @@ export async function listInvoices(where: Prisma.InvoiceWhereInput, filter?: Inv
   const invoices = await prisma.invoice.findMany({
     where: filter ? { AND: [where, { status: { in: storedStatusesFor(filter) } }] } : where,
     select: invoiceListSelect,
-    orderBy: [{ issuedDate: "desc" }, { number: "desc" }],
+    // Nomor mengikuti bulan terbit lalu urutan pembuatan, jadi urutan nomor = urutan terbaru.
+    orderBy: { number: "desc" },
   });
   return invoices
     .map((invoice) => ({ ...invoice, amount: Number(invoice.amount), status: effectiveInvoiceStatus(invoice, now) }))
