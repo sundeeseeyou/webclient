@@ -14,7 +14,7 @@ export type RenewalStatus = {
 
 const toneRank: Record<RenewalTone, number> = { neutral: 0, warning: 1, danger: 2 };
 
-export function renewalTone(days: number): RenewalTone {
+function renewalTone(days: number): RenewalTone {
   if (days <= RENEWAL_DANGER_DAYS) return "danger";
   if (days <= RENEWAL_WARNING_DAYS) return "warning";
   return "neutral";

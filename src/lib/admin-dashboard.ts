@@ -94,6 +94,6 @@ export async function getAdminDashboard(now: Date = new Date()) {
   };
 }
 
-export type AdminDashboard = Awaited<ReturnType<typeof getAdminDashboard>>;
+type AdminDashboard = Awaited<ReturnType<typeof getAdminDashboard>>;
 export type AdminSummary = AdminDashboard["summary"];
 export type RecentRequest = AdminDashboard["recentRequests"][number];

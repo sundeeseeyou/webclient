@@ -49,6 +49,4 @@ export const newClientFormSchema = clientProfileSchema
 
 export type ClientProfileInput = z.input<typeof clientProfileSchema>;
 export type ClientAccountInput = z.input<typeof clientAccountSchema>;
-export type CreateClientInput = z.infer<typeof createClientSchema>;
-export type UpdateClientInput = z.infer<typeof updateClientSchema>;
 export type NewClientFormInput = z.input<typeof newClientFormSchema>;

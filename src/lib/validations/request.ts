@@ -34,14 +34,14 @@ export const revisionSchema = requestSchema
   .omit({ websiteId: true, projectId: true })
   .extend({ type: requestType.default("DESIGN_REVISION") });
 
-export const rejectionReasonField = z
+const rejectionReasonField = z
   .string()
   .trim()
   .min(1, "Alasan penolakan wajib diisi")
   .min(REJECTION_REASON_MIN, `Alasan penolakan minimal ${REJECTION_REASON_MIN} karakter`)
   .max(1000, "Alasan penolakan maksimal 1000 karakter");
 
-export const adminResponseField = optionalText("Tanggapan", 2000);
+const adminResponseField = optionalText("Tanggapan", 2000);
 
 export const requestStatusSchema = z
   .object({

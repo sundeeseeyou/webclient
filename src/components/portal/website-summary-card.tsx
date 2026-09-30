@@ -15,7 +15,7 @@ import { mostUrgentTone, type RenewalTone } from "@/lib/renewal";
 import { websiteStatusTone } from "@/lib/status-tones";
 import { compareWithPreviousMonth, formatNumber, type MonthlyPoint } from "@/lib/website-stats";
 
-export type WebsiteSummary = {
+type WebsiteSummary = {
   id: string;
   domain: string;
   platform: Platform;

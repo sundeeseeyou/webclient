@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 
-export type NotificationType =
+type NotificationType =
   | "NEW_MESSAGE"
   | "NEW_REQUEST"
   | "REQUEST_UPDATED"

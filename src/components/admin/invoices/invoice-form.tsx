@@ -15,7 +15,7 @@ import { apiRequest, setFieldErrors } from "@/lib/api-client";
 import { uiText } from "@/lib/labels";
 import { type InvoiceInput, type InvoiceValues, invoiceSchema } from "@/lib/validations/invoice";
 
-export type InvoiceProjectOption = { id: string; name: string; company: string };
+type InvoiceProjectOption = { id: string; name: string; company: string };
 
 type InvoiceFormProps = {
   defaultValues: DefaultValues<InvoiceInput>;

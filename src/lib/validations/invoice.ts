@@ -7,7 +7,7 @@ const MAX_UNIT_PRICE = 10_000_000_000;
 // Kolom amount bertipe Decimal(14,2), jadi total harus di bawah 1 triliun.
 const MAX_TOTAL = 999_999_999_999;
 
-export const DUE_DATE_ERROR = "Jatuh tempo tidak boleh sebelum tanggal terbit";
+const DUE_DATE_ERROR = "Jatuh tempo tidak boleh sebelum tanggal terbit";
 
 // Isian kosong ditolak dulu, karena z.coerce mengubah "" menjadi 0 yang lolos sebagai harga Rp 0.
 function requiredNumber(label: string) {
@@ -16,7 +16,7 @@ function requiredNumber(label: string) {
     .pipe(z.coerce.number({ message: `${label} harus berupa angka` }).int(`${label} harus angka bulat`));
 }
 
-export const invoiceItemSchema = z.object({
+const invoiceItemSchema = z.object({
   description: requiredText("Deskripsi item", 200),
   qty: requiredNumber("Jumlah").pipe(
     z.number().min(1, "Jumlah minimal 1").max(MAX_QTY, `Jumlah maksimal ${MAX_QTY.toLocaleString("id-ID")}`),
@@ -56,4 +56,3 @@ export const invoiceUpdateSchema = invoiceFields.refine(hasValidDueDate, dueDate
 
 export type InvoiceInput = z.input<typeof invoiceSchema>;
 export type InvoiceValues = z.output<typeof invoiceSchema>;
-export type InvoiceItemValues = z.output<typeof invoiceItemSchema>;

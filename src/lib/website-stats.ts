@@ -1,6 +1,6 @@
 import { startOfMonthWib, toMonthInputValue } from "@/lib/dates";
 
-export const CHART_MONTHS = 6;
+const CHART_MONTHS = 6;
 
 type StatRow = { period: Date; visitors: number; pageviews: number };
 

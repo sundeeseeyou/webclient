@@ -6,7 +6,7 @@ import { progressSelect, projectProgress } from "@/lib/progress";
 const longMonthFormatter = new Intl.DateTimeFormat("id-ID", { month: "long", year: "numeric", timeZone: "Asia/Jakarta" });
 
 // "September 2026"
-export function formatMonthLong(date: Date): string {
+function formatMonthLong(date: Date): string {
   return longMonthFormatter.format(date);
 }
 

@@ -2,10 +2,8 @@ import type {
   ArticleStatus,
   InvoiceStatus,
   ProjectStatus,
-  RequestPriority,
   RequestStatus,
   SprintStatus,
-  TaskStatus,
   WebsiteStatus,
 } from "@prisma/client";
 
@@ -38,12 +36,6 @@ export const sprintStatusTone: Record<SprintStatus, Tone> = {
   DONE: "success",
 };
 
-export const taskStatusTone: Record<TaskStatus, Tone> = {
-  TODO: "neutral",
-  IN_PROGRESS: "info",
-  DONE: "success",
-};
-
 export const invoiceStatusTone: Record<InvoiceStatus, Tone> = {
   DRAFT: "neutral",
   SENT: "info",
@@ -59,11 +51,4 @@ export const requestStatusTone: Record<RequestStatus, Tone> = {
   REJECTED: "danger",
   IN_PROGRESS: "info",
   DONE: "success",
-};
-
-export const requestPriorityTone: Record<RequestPriority, Tone> = {
-  LOW: "neutral",
-  MEDIUM: "info",
-  HIGH: "warning",
-  URGENT: "danger",
 };

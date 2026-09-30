@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import type { SessionUser } from "@/lib/rbac";
 
 // "Belum lunas" = invoice yang sudah dikirim tapi belum dibayar, termasuk yang lewat jatuh tempo.
-export const UNPAID_FILTER = "unpaid";
+const UNPAID_FILTER = "unpaid";
 export type InvoiceFilter = InvoiceStatus | typeof UNPAID_FILTER;
 
 const UNPAID_STATUSES: InvoiceStatus[] = ["SENT", "OVERDUE"];

@@ -59,5 +59,3 @@ export function wholeNumber(label: string) {
     .int(`${label} harus bilangan bulat`)
     .min(0, `${label} tidak boleh negatif`);
 }
-
-export const idField = z.string().min(1, "Pilihan wajib diisi");

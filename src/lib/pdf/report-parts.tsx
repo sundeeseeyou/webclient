@@ -1,7 +1,7 @@
 import { Text, View } from "@react-pdf/renderer";
 import { pdfColors, pdfStyles } from "@/lib/pdf/theme";
 
-export type PdfColumn = { label: string; width: string; align?: "left" | "right" };
+type PdfColumn = { label: string; width: string; align?: "left" | "right" };
 export type PdfCell = string | { text: string; color?: string };
 
 type PdfTableProps = {

@@ -3,8 +3,8 @@ import { prisma } from "@/lib/prisma";
 
 const REQUEST_TIMEOUT_MS = 10_000;
 
-export const WORDPRESS_FETCH_FAILED = "Tidak dapat mengambil artikel dari WordPress. Periksa alamat API.";
-export const WORDPRESS_TIMEOUT = "WordPress tidak merespons dalam 10 detik. Coba lagi beberapa saat lagi.";
+const WORDPRESS_FETCH_FAILED = "Tidak dapat mengambil artikel dari WordPress. Periksa alamat API.";
+const WORDPRESS_TIMEOUT = "WordPress tidak merespons dalam 10 detik. Coba lagi beberapa saat lagi.";
 
 export class WordPressSyncError extends Error {}
 
@@ -40,7 +40,7 @@ function fromCodePoint(code: number, fallback: string): string {
 }
 
 // Judul dari WordPress berupa HTML ("Kopi &#8211; Gayo"), jadi tag dibuang dan entity diubah ke karakter biasa.
-export function decodeHtmlTitle(value: string): string {
+function decodeHtmlTitle(value: string): string {
   return value
     .replace(/<[^>]*>/g, "")
     .replace(/&#x([0-9a-f]+);/gi, (match, hex: string) => fromCodePoint(parseInt(hex, 16), match))
@@ -55,7 +55,7 @@ function parsePostDate(value: string): Date | null {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
-export async function fetchWordPressPosts(apiUrl: string): Promise<WordPressPost[]> {
+async function fetchWordPressPosts(apiUrl: string): Promise<WordPressPost[]> {
   const url = `${apiUrl.replace(/\/+$/, "")}/wp/v2/posts?per_page=100&_fields=id,title,link,date`;
   let response: Response;
   try {

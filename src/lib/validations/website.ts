@@ -7,7 +7,7 @@ const DOMAIN_PATTERN = /^([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}$/;
 const MAX_COUNT = 1_000_000_000;
 
 // "https://Senyumsehat.co.id/" -> "senyumsehat.co.id", supaya domain yang sama tidak tersimpan dua kali dengan penulisan berbeda.
-export function normalizeDomain(value: string): string {
+function normalizeDomain(value: string): string {
   return value
     .trim()
     .toLowerCase()

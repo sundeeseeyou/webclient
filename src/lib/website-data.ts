@@ -4,7 +4,7 @@ import { fail } from "@/lib/api";
 import { parseDateInput } from "@/lib/dates";
 import type { articleSchema, WebsiteValues } from "@/lib/validations/website";
 
-export const DOMAIN_TAKEN = "Domain sudah terdaftar";
+const DOMAIN_TAKEN = "Domain sudah terdaftar";
 
 export function domainTakenResponse() {
   return fail(DOMAIN_TAKEN, 409, { domain: DOMAIN_TAKEN });
