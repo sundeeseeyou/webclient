@@ -29,11 +29,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    jwt({ token, user }) {
+    async jwt({ token, user }) {
       if (user?.id) {
         token.id = user.id;
         token.role = user.role;
         token.clientId = user.clientId;
+        return token;
+      }
+      // Klien yang dinonaktifkan admin langsung keluar di request berikutnya, tidak menunggu sesinya habis.
+      if (token.role === "CLIENT") {
+        const client = token.clientId
+          ? await prisma.client.findUnique({ where: { id: token.clientId }, select: { isActive: true } })
+          : null;
+        if (!client?.isActive) return null;
       }
       return token;
     },
