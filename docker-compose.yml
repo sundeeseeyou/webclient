@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: boowat
+      POSTGRES_PASSWORD: boowat
+      POSTGRES_DB: boowat
+    ports:
+      - "5434:5432"
+    volumes:
+      - boowat-db:/var/lib/postgresql/data
+
+volumes:
+  boowat-db:
