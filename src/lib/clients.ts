@@ -26,6 +26,8 @@ export async function listClients(query?: string) {
   });
 }
 
+export type ClientListItem = Awaited<ReturnType<typeof listClients>>[number];
+
 export async function getClientDetail(id: string) {
   const client = await prisma.client.findUnique({
     where: { id },
