@@ -18,7 +18,7 @@ export const clientProfileSchema = z.object({
 });
 
 export const clientAccountSchema = z.object({
-  name: requiredText("Nama akun", 100),
+  name: requiredText("Nama pengguna", 100),
   email: emailField,
   password: passwordField(),
 });
