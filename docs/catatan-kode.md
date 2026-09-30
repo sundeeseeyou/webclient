@@ -146,3 +146,82 @@ Pola setiap fitur: **halaman** (server component, membaca Prisma) → **komponen
 4. Pihak lain melihat pesan baru lewat polling setiap 15 detik saat tab aktif.
 
 **Hak akses (BB-04):** halaman portal memakai `requireClient()` dan query `{ id, clientId }`, sehingga proyek klien lain → HTTP 404. Mutasi proyek, sprint, dan task hanya untuk admin (403 untuk klien).
+
+## PB-03: Invoice
+
+**File utama**
+
+| File | Peran |
+|---|---|
+| `src/lib/invoice.ts` | Aturan bisnis: nomor `INV/YYYY/MM/NNNN`, total dari item, jatuh tempo, status efektif, aksi kirim/lunas/batal. |
+| `src/lib/validations/invoice.ts` | Skema Zod invoice dan item (dipakai form dan API). |
+| `src/lib/invoice-queries.ts`, `src/lib/invoice-writes.ts` | Aturan akses dan daftar dengan filter; transaksi pembuatan nomor serta aksi status + notifikasi. |
+| `src/app/api/invoices/**` | Daftar/buat, detail/ubah draf, send, mark-paid, cancel, pdf. |
+| `src/lib/pdf/invoice-pdf.tsx` | Dokumen PDF invoice. |
+| `src/lib/invoice-overdue.ts`, `src/app/api/cron/daily/route.ts` | Cron: SENT yang lewat jatuh tempo menjadi OVERDUE. |
+| `src/app/admin/invoices/**`, `src/components/admin/invoices/*` | Daftar dengan filter, form item dinamis, detail + aksi, tab Invoice di proyek dan klien. |
+| `src/app/portal/invoices/page.tsx`, `src/components/portal/invoice-list.tsx` | Daftar invoice klien + unduh PDF. |
+
+**Alur generate invoice (BB-18)**
+1. Tab Invoice di proyek → "Buat Invoice" → `/admin/invoices/new?projectId=`. Klien dan proyek terisi otomatis; tanggal terbit hari ini, jatuh tempo +14 hari.
+2. Form (react-hook-form + `useFieldArray`) memvalidasi per kolom; total di browser hanya untuk tampilan.
+3. `POST /api/invoices` → `requireApiUser("ADMIN")` → validasi ulang → cek proyek milik klien aktif → dalam satu transaksi `generateInvoiceNumber` + `invoice.create` dengan `amount = calculateInvoiceTotal(items)` dan status DRAFT.
+
+**Alur status (BB-19, BB-20)**
+1. Tombol di detail → ConfirmDialog → `POST /api/invoices/[id]/send|mark-paid|cancel`.
+2. `canApplyInvoiceAction(effectiveInvoiceStatus(invoice), aksi)`; aksi yang tidak sesuai status → 400.
+3. Kirim → `notifyClientUsers` ("Invoice baru"). Tandai lunas → `paidAt` terisi.
+4. Klien mengunduh PDF lewat `GET /api/invoices/[id]/pdf`, dengan aturan akses yang sama seperti detail.
+
+**Hak akses (BB-21, BB-04):** klien hanya melihat invoice proyek miliknya yang berstatus Terkirim, Lunas, atau Terlambat. Draf, invoice batal, dan milik klien lain → 404, termasuk PDF-nya.
+
+## PB-05: Permintaan (SLA) dan Persetujuan Proyek
+
+**File utama**
+
+| File | Peran |
+|---|---|
+| `src/lib/sla.ts` | Target SLA per prioritas, `computeDueAt`, alur status `canTransition`, `isOverdue`. |
+| `src/lib/validations/request.ts` | Skema form permintaan, form revisi, dan ubah status (alasan penolakan wajib). |
+| `src/lib/requests.ts` | `listRequests()` (urutan kotak masuk) dan parser filter URL. |
+| `src/app/api/requests/**` | Ajukan, daftar dengan filter, detail, ubah status. |
+| `src/app/api/projects/[id]/approve`, `request-revision` | Setujui hasil dan minta revisi. |
+| `src/app/admin/requests/**`, `src/components/admin/requests/*` | Kotak masuk, detail, panel aksi, dialog tolak. |
+| `src/app/portal/requests/**`, `src/components/portal/request-*.tsx` | Daftar dan form Ajukan Permintaan. |
+| `src/components/portal/project-approval.tsx`, `revision-dialog.tsx` | Kartu Setujui Hasil / Minta Revisi di detail proyek klien. |
+
+**Alur ajukan permintaan (BB-11, BB-12)**
+1. Form di `/portal/requests/new` memvalidasi dengan `requestSchema`; setelah prioritas dipilih tampil "Perkiraan waktu respon: …".
+2. `POST /api/requests` → `requireApiUser("CLIENT")` → website/proyek dicek milik klien → `slaRequest.create` dengan `dueAt = computeDueAt(now, prioritas)` dan status Diajukan.
+3. `notifyAdmins` "Permintaan baru" dengan tautan ke detail di kotak masuk admin.
+
+**Alur ubah status (BB-13, BB-14, BB-15)**
+1. Kotak masuk menampilkan badge "Melewati SLA" untuk permintaan yang `isOverdue` dan menaruhnya paling atas.
+2. Panel aksi di detail hanya menampilkan transisi dari `allowedTransitions`. "Tolak" membuka dialog dengan alasan wajib.
+3. `PATCH /api/requests/[id]/status` → validasi (REJECTED tanpa alasan → 400) → `canTransition` (di luar alur → 400) → simpan dengan syarat status lama. `respondedAt` diisi sekali, `resolvedAt` saat Selesai/Ditolak.
+4. `notifyClientUsers` "Status permintaan diperbarui"; klien melihat status, tanggapan, dan alasan penolakan.
+
+**Alur persetujuan proyek (BB-16, BB-17)**
+1. Admin mengubah proyek ke Menunggu Persetujuan, lalu klien mendapat notifikasi.
+2. "Setujui Hasil" → `POST /api/projects/[id]/approve` → status Selesai + `approvedAt` → notifikasi admin.
+3. "Minta Revisi" → dialog form → `POST /api/projects/[id]/request-revision` → dalam satu transaksi permintaan revisi dibuat dan status proyek menjadi Revisi → notifikasi admin.
+
+## Dashboard Admin dan Laporan Bulanan (PB-04)
+
+**File utama**
+
+| File | Peran |
+|---|---|
+| `src/app/admin/(dashboard)/page.tsx`, `src/lib/admin-dashboard.ts` | Beranda admin; semua query ringkasan dalam satu `Promise.all`. |
+| `src/components/admin/dashboard/*` | Kartu ringkasan, permintaan terbaru, perpanjangan terdekat. |
+| `src/app/api/reports/monthly/route.ts`, `src/lib/validations/report.ts` | `GET ?websiteId=&month=YYYY-MM` dan validasi bulan (tidak boleh masa depan). |
+| `src/lib/monthly-report.ts`, `src/lib/pdf/monthly-report-pdf.tsx`, `report-parts.tsx` | Query isi laporan dan dokumen PDF. |
+| `src/app/portal/reports/page.tsx`, `src/components/shared/monthly-report-form.tsx` | Halaman Laporan klien; form yang sama dipakai dialog di detail website admin. |
+
+**Alur dashboard:** `requireAdmin()` → `getAdminDashboard(now)` menghitung klien aktif, proyek berjalan, permintaan baru, permintaan melewati SLA (`overdueWhere`), invoice belum lunas + total, dan domain/hosting yang akan habis. Setiap kartu menaut ke daftar dengan filter, misalnya `/admin/requests?overdue=1` atau `/admin/invoices?status=unpaid`.
+
+**Alur laporan bulanan (BB-22)**
+1. Klien memilih website dan bulan; "Unduh Laporan Bulanan" memanggil API lewat `fetch`.
+2. Route: `requireApiUser()` → validasi parameter → `getMonthlyReport()` dengan filter `clientScope(user)` (website klien lain → 404).
+3. Batas bulan dihitung dalam WIB. Query mengambil statistik bulan itu dan bulan lalu, artikel terbit, permintaan selesai, proyek aktif + progres, serta tanggal perpanjangan.
+4. `pdfResponse(createElement(MonthlyReportDocument, …))` → browser mengunduh `Laporan-{domain}-{YYYY-MM}.pdf`.

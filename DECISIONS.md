@@ -116,3 +116,44 @@ Keputusan yang menyimpang dari PRD (`docs/prd-web.md`) atau mengisi hal yang tid
 | 81 | Nomor invoice diambil dari nomor terbesar dengan prefiks bulan yang sama; bila dua invoice dibuat bersamaan dan nomornya bentrok, penyimpanan diulang. | Kolom `number` unik di schema; urutan per bulan sesuai PRD 6.4. |
 | 82 | PDF memakai font bawaan Helvetica dan kerangka bersama di `src/lib/pdf/` (header logo, footer nomor halaman). Gaya halaman PDF tidak memakai `lineHeight`. | Tanpa file font tambahan. `lineHeight` membuat react-pdf menaruh nomor halaman di luar kertas (sudah diuji). |
 | 83 | Fase 2 kembali dikerjakan paralel oleh tiga agent (Invoice, Permintaan + persetujuan, Dashboard admin + laporan bulanan) dengan kontrak URL filter yang disepakati di awal: `/admin/requests?status=&priority=&clientId=&overdue=1`, `/admin/invoices?status=<status|unpaid>&clientId=`. | Dashboard admin menaut ke halaman milik agent lain. |
+
+## Fase 2 — PB-03 Invoice
+
+| No | Keputusan | Alasan |
+|---|---|---|
+| 84 | Nomor invoice dibuat di server dalam transaksi dan diulang sampai 3 kali bila bentrok; bila tetap bentrok → 409 "silakan simpan ulang". Bila bulan terbit sebuah draf diubah, nomornya dibuat ulang untuk bulan baru. | Nomor harus unik dan berurutan per bulan (PRD 6.4). |
+| 85 | Isian item: harga satuan rupiah bulat (tanpa sen) maksimal 10 miliar, qty 1–10.000, maksimal 50 item, total di bawah 1 triliun; harga kosong ditolak. Jatuh tempo tidak boleh sebelum tanggal terbit. | Sesuai kolom `Decimal(14,2)` dan mencegah isian kosong tersimpan sebagai 0. |
+| 86 | Draf yang jatuh temponya sudah lewat tidak bisa dikirim (400). | Invoice itu akan langsung terlambat begitu diterima klien. |
+| 87 | Aksi kirim, tandai lunas, batal, dan ubah draf memakai syarat status lama (`updateMany`); klik ganda atau request bersamaan mendapat 409. | Notifikasi "invoice baru" tidak terkirim dua kali. |
+| 88 | Invoice hanya bisa dibuat untuk proyek milik klien aktif, dan proyeknya tidak bisa diganti saat diubah. | Konsisten dengan #64 dan #66. |
+| 89 | Filter status invoice memakai status efektif (SENT yang lewat jatuh tempo dihitung OVERDUE), dengan filter tambahan `unpaid` = SENT + OVERDUE. | `effectiveInvoiceStatus` menjadi satu-satunya sumber aturan. |
+| 90 | Data penagih di PDF hanya "Boowat.com"; info rekening ditulis admin di kolom Catatan. | Sistem belum menyimpan alamat/rekening Boowat, dan data dummy dilarang (PRD 15.2). |
+| 91 | Di portal, invoice tampil sebagai daftar baris bertumpuk (bukan tabel) dengan tombol Unduh PDF, tanpa halaman detail. Invoice terlambat diberi latar merah ringan. | Nyaman di HP; PRD 7.3 hanya meminta daftar dan unduh. |
+| 92 | Tab Invoice di detail klien tidak punya tombol buat; invoice selalu dibuat dari proyek. | PRD 6.4: "Generate dari proyek". |
+| 93 | Cron yang mengubah invoice menjadi OVERDUE tidak mengirim notifikasi. | Tidak diminta PRD. |
+
+## Fase 2 — PB-05 Permintaan dan Persetujuan Proyek
+
+| No | Keputusan | Alasan |
+|---|---|---|
+| 94 | Kotak masuk admin diurutkan: melewati SLA dulu, lalu yang masih terbuka menurut batas respon terdekat, lalu Selesai/Ditolak di bawah. Portal klien diurutkan dari yang terbaru. Tanpa paginasi. | PRD 7.2. Status terlambat dihitung, jadi pengurutan dilakukan di aplikasi. |
+| 95 | Klien yang punya website wajib memilih website saat mengajukan permintaan; klien tanpa website tetap bisa mengajukan. | Menafsirkan website "opsional" di PRD 7.3. |
+| 96 | `respondedAt` diisi sekali pada perubahan status pertama; `resolvedAt` diisi saat Selesai atau Ditolak. Alasan penolakan wajib, 10–1000 karakter. Tanggapan kosong tidak menghapus tanggapan lama. | PRD 6.1 dan BB-13. |
+| 97 | Ubah status permintaan, setujui, dan minta revisi memakai syarat status lama; bila kalah balapan → 409 (permintaan) atau 400 (proyek). | Klik ganda atau dua admin bersamaan tidak saling menimpa. |
+| 98 | Minta revisi dikerjakan dalam satu transaksi: buat permintaan (jenis awal Revisi Desain, website dan proyek diambil dari proyek), status proyek menjadi Revisi, dan tanggal persetujuan dikosongkan. | BB-17. |
+| 99 | Notifikasi persetujuan memakai tipe baru `PROJECT_APPROVED`; notifikasi revisi memakai `NEW_REQUEST`. | Tipe lama tidak ada yang cocok. |
+| 100 | Badge "Melewati SLA" hanya tampil di admin. Klien melihat perkiraan waktu respon dan tanggapan admin; tidak ada halaman detail permintaan di portal. | PRD 6.1 dan 7.3. |
+| 101 | Deretan tab detail klien (kini 5 tab) bisa digeser ke samping di layar sempit. | Aturan 360px tanpa scroll halaman. |
+
+## Fase 2 — Dashboard Admin dan Laporan Bulanan
+
+| No | Keputusan | Alasan |
+|---|---|---|
+| 102 | Beranda admin ada di route group `admin/(dashboard)`, supaya skeleton `loading.tsx`-nya tidak ikut tampil di halaman admin lain. | `loading.tsx` membungkus semua sub-halaman di foldernya. |
+| 103 | Kartu dashboard: proyek berjalan = Perencanaan, Sedang Dikerjakan, Menunggu Persetujuan, Revisi. Invoice belum lunas = SENT + OVERDUE beserta totalnya. Kartu domain/hosting ≤30 hari menghitung website milik klien aktif, termasuk yang sudah lewat. Kartu SLA berwarna merah hanya bila ada yang terlambat. | PRD 7.2. Semua angka dari database. |
+| 104 | Daftar perpanjangan menampilkan domain/hosting yang habis dalam ≤60 hari atau sudah lewat; angka kartu ≤30 hari dihitung dari data yang sama. | Kartu dan daftar tidak pernah berbeda. |
+| 105 | Pilihan bulan laporan berupa daftar 12 bulan terakhir berlabel Indonesia (default bulan lalu), bukan `input type="month"`. API menolak bulan di masa depan. | `input type="month"` tidak didukung Firefox/Safari desktop. |
+| 106 | Laporan diunduh lewat `fetch` + blob agar error tampil sebagai toast dan tombol menampilkan "Menyiapkan laporan...". | Umpan balik saat PDF sedang dibuat. |
+| 107 | Permintaan selesai di laporan = status DONE dengan tanggal selesai di bulan itu (WIB), milik website tersebut atau proyeknya, dan dibatasi klien pemilik website saat ini. Status proyek di laporan adalah status saat diunduh ("Status per {tanggal}"). | Riwayat status tidak disimpan. Pembatasan klien mencegah data klien lama bocor bila website dipindah (#54). |
+| 108 | Nilai kosong di laporan ditulis "Belum ada data"; perbandingan ditulis "Belum bisa dibandingkan" bila data bulan lalu kosong. | PRD 15.1: tanpa angka dummy. |
+| 109 | Tabel PDF tidak memotong baris antarhalaman; header tabel tidak diulang di halaman lanjutan. | Keterbatasan react-pdf yang dapat diterima untuk MVP. |
