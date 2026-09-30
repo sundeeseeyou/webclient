@@ -108,25 +108,44 @@ export const requestStatusLabels: Record<RequestStatus, string> = {
 
 export const navLabels = {
   dashboard: "Beranda",
+  clients: "Klien",
+  websites: "Website",
+  projects: "Proyek",
+  requests: "Permintaan",
+  invoices: "Invoice",
+  reports: "Laporan",
 } as const;
 
 export const uiText = {
   appName: "Boowat",
   adminPortal: "Portal Admin",
   clientPortal: "Portal Klien",
-  openMenu: "Buka menu",
+  menu: "Menu",
+  toggleSidebar: "Buka atau tutup menu samping",
   logout: "Keluar",
   notifications: "Notifikasi",
   noNotifications: "Belum ada notifikasi.",
+  markAllRead: "Tandai semua dibaca",
   unreadNotifications: (count: number) => `${count} notifikasi belum dibaca`,
   greeting: (name: string) => `Selamat datang, ${name}.`,
   notFoundTitle: "Halaman tidak ditemukan",
   notFoundBody: "Halaman yang Anda buka tidak ada atau sudah dipindahkan.",
   backToHome: "Kembali ke beranda",
+  save: "Simpan",
+  saving: "Menyimpan...",
+  cancel: "Batal",
+  delete: "Hapus",
+  edit: "Ubah",
+  processing: "Memproses...",
+  saved: "Perubahan berhasil disimpan.",
+  saveFailed: "Gagal menyimpan. Periksa kembali isian Anda.",
 } as const;
 
 export const authText = {
   title: "Masuk ke akun Anda",
+  subtitle: "Gunakan email dan password yang diberikan oleh tim Boowat.",
+  panelTitle: "Portal proyek dan klien Boowat.com",
+  panelBody: "Pantau progres proyek, data website, invoice, dan permintaan perubahan dalam satu tempat.",
   email: "Email",
   password: "Password",
   submit: "Masuk",

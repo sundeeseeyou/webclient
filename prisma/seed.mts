@@ -367,7 +367,7 @@ async function main() {
   await prisma.notification.createMany({
     data: [
       { userId: admin.id, type: "NEW_REQUEST", title: "Permintaan baru", body: `${kopi.company}: ${requests[1].title}`, createdAt: hoursFromNow(-8) },
-      { userId: klinikUser.id, type: "WAITING_APPROVAL", title: "Proyek menunggu persetujuan", body: `${redesign.name} sudah selesai dan menunggu persetujuan Anda.`, createdAt: daysFromNow(-2) },
+      { userId: klinikUser.id, type: "WAITING_APPROVAL", title: "Proyek menunggu persetujuan", body: `${redesign.name} sudah selesai dan menunggu persetujuan Anda.`, link: `/portal/projects/${redesign.id}`, createdAt: daysFromNow(-2) },
       { userId: kopiUser.id, type: "INVOICE_SENT", title: "Invoice baru", body: `Invoice ${invoices[2].number} sudah dikirim.`, createdAt: daysFromNow(-5) },
     ],
   });

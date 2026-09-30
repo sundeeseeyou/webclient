@@ -3,10 +3,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
+import { PiWarningCircle } from "react-icons/pi";
 import { login } from "@/app/(auth)/actions";
+import { FormField } from "@/components/shared/form-field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { authText } from "@/lib/labels";
 import { loginSchema } from "@/lib/validations/auth";
 
@@ -31,29 +32,35 @@ export function LoginForm() {
   });
 
   return (
-    <form onSubmit={onSubmit} noValidate className="mt-6 space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="email">{authText.email}</Label>
-        <Input id="email" type="email" autoComplete="email" aria-invalid={Boolean(errors.email)} {...register("email")} />
-        {errors.email && <p className="text-sm text-danger">{errors.email.message}</p>}
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="password">{authText.password}</Label>
+    <form onSubmit={onSubmit} noValidate className="mt-8 space-y-5">
+      {formError && (
+        <p role="alert" className="flex items-center gap-2 rounded-lg border border-danger/30 bg-danger/5 px-3 py-2.5 text-danger">
+          <PiWarningCircle className="size-5 shrink-0" />
+          {formError}
+        </p>
+      )}
+      <FormField label={authText.email} htmlFor="email" error={errors.email?.message} required>
+        <Input
+          id="email"
+          type="email"
+          autoComplete="email"
+          placeholder="nama@perusahaan.co.id"
+          className="h-11"
+          aria-invalid={Boolean(errors.email)}
+          {...register("email")}
+        />
+      </FormField>
+      <FormField label={authText.password} htmlFor="password" error={errors.password?.message} required>
         <Input
           id="password"
           type="password"
           autoComplete="current-password"
+          className="h-11"
           aria-invalid={Boolean(errors.password)}
           {...register("password")}
         />
-        {errors.password && <p className="text-sm text-danger">{errors.password.message}</p>}
-      </div>
-      {formError && (
-        <p role="alert" className="rounded-md border border-danger/30 bg-danger/5 px-3 py-2 text-sm text-danger">
-          {formError}
-        </p>
-      )}
-      <Button type="submit" className="w-full" disabled={isPending}>
+      </FormField>
+      <Button type="submit" size="lg" className="w-full" disabled={isPending}>
         {isPending ? authText.submitting : authText.submit}
       </Button>
     </form>
