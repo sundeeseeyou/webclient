@@ -40,7 +40,7 @@ export function ClientProjectsTab({ clientId, projects }: ClientProjectsTabProps
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-muted-foreground">Riwayat proyek, dari yang terbaru. Klik baris untuk membuka papan sprint.</p>
         {addButton}
       </div>

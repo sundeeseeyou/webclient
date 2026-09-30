@@ -26,7 +26,7 @@ export function ClientAccountsTab({ clientId, isActive, users }: ClientAccountsT
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-muted-foreground">
           {isActive
             ? "Semua akun di bawah ini bisa masuk ke portal klien."
