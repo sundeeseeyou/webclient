@@ -108,3 +108,41 @@ Pola setiap fitur: **halaman** (server component, membaca Prisma) → **komponen
 4. Kartu website klien berwarna kuning bila ≤30 hari dan merah bila ≤7 hari (`renewal.ts`).
 
 **Hak akses (BB-04):** halaman dan API klien selalu memfilter `clientId` dari session; website klien lain → 404. Ubah, hapus, statistik, dan artikel hanya untuk ADMIN (403 untuk klien).
+
+## Proyek, Sprint & Task (PB-01) dan Pesan Proyek (PB-02)
+
+**File utama**
+
+| File | Peran |
+|---|---|
+| `src/lib/validations/project.ts` | Skema Zod proyek, sprint, task, dan pesan, dengan aturan tanggal selesai ≥ tanggal mulai. |
+| `src/lib/projects.ts` | `listProjects()`: daftar proyek beserta progres, dipakai admin, portal, dan API. |
+| `src/lib/messages.ts` | Mengambil dan membuat pesan thread, serta cuplikan untuk notifikasi. |
+| `src/app/api/projects/**`, `src/app/api/sprints/**`, `src/app/api/tasks/[id]/route.ts` | Route handler proyek, sprint, task, dan pesan. |
+| `src/app/admin/projects/**` | Daftar dengan filter, form tambah, detail dengan tab Ringkasan / Sprint & Task / Pesan. |
+| `src/components/admin/kanban-board.tsx`, `kanban-column.tsx`, `task-card.tsx` | Papan kanban: tombol panah, drag & drop HTML5, pembaruan optimistis. |
+| `src/components/shared/message-thread.tsx` | Thread pesan untuk admin & portal, polling 15 detik. |
+| `src/app/portal/projects/**`, `src/components/portal/project-text.ts` | Daftar & detail proyek klien dengan bahasa sederhana. |
+
+**Alur tambah proyek**
+1. `/admin/projects/new` memuat klien aktif dan websitenya, lalu `ProjectForm` (react-hook-form + `projectSchema`) memvalidasi di browser.
+2. `POST /api/projects` → `requireApiUser("ADMIN")` → validasi ulang dengan skema yang sama → cek klien aktif dan kepemilikan website → `prisma.project.create`.
+3. Berhasil → toast lalu pindah ke detail proyek.
+
+**Alur ubah status**
+1. Select di tab Ringkasan → `PATCH /api/projects/[id]`.
+2. Bila status baru Menunggu Persetujuan, `notifyClientUsers()` membuat notifikasi dengan tautan ke `/portal/projects/<id>`.
+
+**Alur kanban dan progres (BB-09)**
+1. Kartu dipindah (panah atau drag), dan tampilan langsung berubah (optimistis).
+2. `PATCH /api/tasks/[id]` dengan `{ status, order }`; server menyisipkan task dan menomori ulang kolom dalam satu transaksi.
+3. `router.refresh()` menghitung ulang progres lewat `projectProgress()`; portal klien membaca angka yang sama.
+4. Bila API gagal, kartu kembali ke posisi semula dan muncul toast.
+
+**Alur pesan (BB-10)**
+1. Textarea divalidasi `messageSchema` (wajib, maksimal 2000 karakter).
+2. `POST /api/projects/[id]/messages` → proyek dicari dengan filter `clientScope(user)` (proyek klien lain → 404) → `prisma.message.create`.
+3. Notifikasi ke pihak lain: klien → semua admin (tautan `?tab=pesan`), admin → user klien.
+4. Pihak lain melihat pesan baru lewat polling setiap 15 detik saat tab aktif.
+
+**Hak akses (BB-04):** halaman portal memakai `requireClient()` dan query `{ id, clientId }`, sehingga proyek klien lain → HTTP 404. Mutasi proyek, sprint, dan task hanya untuk admin (403 untuk klien).

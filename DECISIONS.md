@@ -86,3 +86,21 @@ Keputusan yang menyimpang dari PRD (`docs/prd-web.md`) atau mengisi hal yang tid
 | 61 | Sinkron GA4 hanya untuk bulan berjalan, dan hasilnya menimpa input manual bulan itu (sumber GA4). Adapter memakai JWT service account yang ditandatangani `node:crypto`, tanpa library Google. Belum diuji dengan kredensial asli. | PRD 6.5; tanpa kredensial, adapter langsung selesai tanpa request. |
 | 62 | Grafik pengunjung berupa batang tunggal tanpa animasi. Bulan tanpa data tidak diberi batang dan tooltip-nya "Belum ada data"; label sumbu dua baris agar 6 bulan muat di layar 360px. | PRD 15.1: tanpa angka dummy dan tanpa animasi. |
 | 63 | Di dashboard klien, proyek aktif (status selain Selesai) tampil di kartu website masing-masing, sedangkan banner "menunggu persetujuan" mencakup semua proyek klien. Perbandingan dengan bulan lalu disembunyikan bila data bulan lalu kosong. Warna kartu mengikuti masa aktif yang paling mendesak. | PRD 7.3. |
+
+## Fase 1 — Proyek, Sprint & Task (PB-01) dan Pesan (PB-02)
+
+| No | Keputusan | Alasan |
+|---|---|---|
+| 64 | Klien pemilik proyek tidak bisa diganti saat mengubah proyek; di dialog ubah, pilihan klien dikunci. | Pesan dan invoice proyek harus tetap milik klien yang sama. |
+| 65 | Proyek yang sudah punya invoice tidak bisa dihapus (409, dengan saran mengubah status menjadi Ditunda). | Hapus berantai akan ikut menghapus catatan keuangan. |
+| 66 | Proyek baru hanya untuk klien aktif, dan website yang dipilih harus milik klien itu. | Mencegah data proyek tertaut ke klien atau website yang salah. |
+| 67 | Notifikasi "menunggu persetujuan" hanya dikirim saat status berubah menjadi Menunggu Persetujuan, bukan saat status yang sama disimpan ulang. | Mencegah notifikasi ganda ke klien. |
+| 68 | Tanggal selesai proyek dan sprint harus ≥ tanggal mulai, juga ketika PATCH hanya mengirim salah satu tanggal (dibandingkan dengan nilai yang tersimpan). | Validasi sederhana yang konsisten di form dan API. |
+| 69 | Task baru masuk kolom "Belum Dikerjakan" di urutan paling bawah. Saat dipindah, server menyisipkan task di posisi tujuan lalu menomori ulang kolom tujuan dalam satu transaksi. | `order` hanya dipakai sebagai urutan relatif. |
+| 70 | Drag & drop memakai HTML5 native, tanpa library, dan hanya berlaku di dalam satu sprint. Di layar sentuh (tidak didukung HTML5 drag) yang dipakai tombol panah; di bawah 768px kolom kanban bertumpuk. Pemindahan bersifat optimistis dan kembali ke posisi semula bila API gagal. | PRD 7.2 meminta pindah status "via tombol atau drag". |
+| 71 | Admin bebas memilih status proyek apa pun. | PRD tidak mengatur alur transisi status proyek; alur persetujuan klien dibuat di Fase 2. |
+| 72 | Thread pesan diambil ulang seluruhnya setiap 15 detik saat tab aktif dan saat tab kembali aktif, tanpa paginasi. Ctrl+Enter mengirim pesan. | PRD 6.6: tidak realtime. Cukup untuk jumlah pesan per proyek di MVP. |
+| 73 | Judul notifikasi pesan: "Pesan baru dari {perusahaan}" untuk admin dan "Pesan baru dari tim Boowat" untuk klien. Isinya nama proyek + cuplikan 80 karakter. Tautan untuk admin membuka tab Pesan (`?tab=pesan`). | PRD 6.6. |
+| 74 | Portal klien memakai istilah "Tahapan Pekerjaan" (sprint) dan "pekerjaan" (task), dengan kalimat penjelas per status proyek. Detail task tidak ditampilkan ke klien. | PRD 7.3 dan aturan bahasa non-teknis di portal klien. |
+| 75 | Kunci tab di URL memakai Bahasa Indonesia (`?tab=website|proyek|akun`, `?tab=ringkasan|sprint|pesan`), disimpan lewat `history.replaceState`. | Konsisten antar halaman; tautan notifikasi bisa langsung membuka tab tertentu. |
+| 76 | Halaman detail di portal klien tidak memakai `loading.tsx`; skeleton dashboard ada di route group `portal/(home)` dan skeleton daftar proyek di `portal/projects/(list)`. | `loading.tsx` memulai streaming sebelum `notFound()` dipanggil, sehingga halaman "tidak ditemukan" terkirim dengan status 200. Portal klien adalah batas keamanan BB-04, jadi harus mengembalikan 404 asli. Detail di portal admin tetap memakai skeleton (soft 404 dapat diterima untuk admin). |
