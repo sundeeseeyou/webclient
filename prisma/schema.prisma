@@ -1,0 +1,295 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  CLIENT
+}
+
+enum Platform {
+  WORDPRESS
+  NEXTJS
+  REACT
+  LARAVEL
+  OTHER
+}
+
+enum WebsiteStatus {
+  ACTIVE
+  MAINTENANCE
+  INACTIVE
+}
+
+enum DataSource {
+  MANUAL
+  GA4
+  WORDPRESS
+}
+
+enum ArticleStatus {
+  PUBLISHED
+  DRAFT
+}
+
+enum ProjectType {
+  NEW_WEBSITE
+  FEATURE
+  REVISION
+  CONTENT
+  MAINTENANCE
+}
+
+enum ProjectStatus {
+  PLANNING
+  IN_PROGRESS
+  WAITING_APPROVAL
+  REVISION
+  DONE
+  ON_HOLD
+}
+
+enum SprintStatus {
+  PLANNED
+  ACTIVE
+  DONE
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+enum RequestType {
+  ADD_CONTENT
+  EDIT_CONTENT
+  DESIGN_REVISION
+  NEW_FEATURE
+  BUG_FIX
+  OTHER
+}
+
+enum RequestPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum RequestStatus {
+  SUBMITTED
+  IN_REVIEW
+  APPROVED
+  REJECTED
+  IN_PROGRESS
+  DONE
+}
+
+model User {
+  id            String         @id @default(cuid())
+  name          String
+  email         String         @unique
+  passwordHash  String
+  role          Role
+  clientId      String?
+  client        Client?        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  messages      Message[]
+  notifications Notification[]
+  requests      SlaRequest[]   @relation("RequestCreator")
+  createdAt     DateTime       @default(now())
+}
+
+model Client {
+  id        String       @id @default(cuid())
+  name      String // nama PIC
+  email     String
+  phone     String?
+  company   String
+  address   String?
+  notes     String?
+  isActive  Boolean      @default(true)
+  users     User[]
+  websites  Website[]
+  projects  Project[]
+  requests  SlaRequest[]
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+model Website {
+  id              String        @id @default(cuid())
+  clientId        String
+  client          Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  domain          String        @unique
+  platform        Platform
+  hostingProvider String?
+  hostingRenewAt  DateTime?
+  domainRenewAt   DateTime?
+  status          WebsiteStatus @default(ACTIVE)
+  ga4PropertyId   String? // opsional, untuk sinkron pengunjung
+  wpApiUrl        String? // opsional, contoh: https://domain.com/wp-json
+  stats           WebsiteStat[]
+  articles        Article[]
+  projects        Project[]
+  requests        SlaRequest[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+model WebsiteStat {
+  id        String     @id @default(cuid())
+  websiteId String
+  website   Website    @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+  period    DateTime // selalu tanggal 1 bulan tersebut (00:00 WIB)
+  visitors  Int
+  pageviews Int
+  source    DataSource @default(MANUAL)
+  updatedAt DateTime   @updatedAt
+
+  @@unique([websiteId, period])
+}
+
+model Article {
+  id          String        @id @default(cuid())
+  websiteId   String
+  website     Website       @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+  title       String
+  url         String?
+  status      ArticleStatus @default(PUBLISHED)
+  publishedAt DateTime?
+  source      DataSource    @default(MANUAL)
+  externalId  String? // id post dari WordPress
+
+  @@unique([websiteId, externalId])
+}
+
+model Project {
+  id          String        @id @default(cuid())
+  clientId    String
+  client      Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  websiteId   String?
+  website     Website?      @relation(fields: [websiteId], references: [id], onDelete: SetNull)
+  name        String
+  description String?
+  type        ProjectType
+  status      ProjectStatus @default(PLANNING)
+  startDate   DateTime
+  endDate     DateTime?
+  approvedAt  DateTime?
+  sprints     Sprint[]
+  messages    Message[]
+  invoices    Invoice[]
+  requests    SlaRequest[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model Sprint {
+  id        String       @id @default(cuid())
+  projectId String
+  project   Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  name      String
+  goal      String?
+  startDate DateTime
+  endDate   DateTime
+  status    SprintStatus @default(PLANNED)
+  tasks     Task[]
+}
+
+model Task {
+  id          String     @id @default(cuid())
+  sprintId    String
+  sprint      Sprint     @relation(fields: [sprintId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  status      TaskStatus @default(TODO)
+  assignee    String?
+  order       Int        @default(0)
+  updatedAt   DateTime   @updatedAt
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  senderId  String
+  sender    User     @relation(fields: [senderId], references: [id])
+  body      String
+  createdAt DateTime @default(now())
+}
+
+model Invoice {
+  id         String        @id @default(cuid())
+  projectId  String
+  project    Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  number     String        @unique // format: INV/2026/09/0001
+  amount     Decimal       @db.Decimal(14, 2) // = jumlah item
+  status     InvoiceStatus @default(DRAFT)
+  issuedDate DateTime
+  dueDate    DateTime
+  paidAt     DateTime?
+  notes      String?
+  items      InvoiceItem[]
+  createdAt  DateTime      @default(now())
+}
+
+model InvoiceItem {
+  id          String  @id @default(cuid())
+  invoiceId   String
+  invoice     Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  description String
+  qty         Int     @default(1)
+  unitPrice   Decimal @db.Decimal(14, 2)
+}
+
+model SlaRequest {
+  id              String          @id @default(cuid())
+  clientId        String
+  client          Client          @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  websiteId       String?
+  website         Website?        @relation(fields: [websiteId], references: [id], onDelete: SetNull)
+  projectId       String?
+  project         Project?        @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  createdById     String
+  createdBy       User            @relation("RequestCreator", fields: [createdById], references: [id])
+  type            RequestType
+  priority        RequestPriority @default(MEDIUM)
+  title           String
+  description     String
+  referenceUrl    String? // link Google Drive / contoh desain
+  status          RequestStatus   @default(SUBMITTED)
+  adminResponse   String?
+  rejectionReason String?
+  dueAt           DateTime // batas waktu respon (SLA)
+  respondedAt     DateTime? // pertama kali admin merespons
+  resolvedAt      DateTime?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String // NEW_MESSAGE, NEW_REQUEST, REQUEST_UPDATED, INVOICE_SENT, WAITING_APPROVAL, RENEWAL_REMINDER
+  title     String
+  body      String
+  link      String?
+  dedupeKey String?   @unique // mencegah notifikasi ganda dari cron
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+}
