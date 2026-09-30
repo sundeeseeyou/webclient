@@ -17,17 +17,17 @@ export default async function ClientDetailPage({ params, searchParams }: PagePro
 
   const tabs = [
     {
-      value: "websites",
+      value: "website",
       label: `Website (${client.websites.length})`,
       content: <ClientWebsitesTab clientId={client.id} websites={client.websites} />,
     },
     {
-      value: "projects",
+      value: "proyek",
       label: `Proyek (${client.projects.length})`,
       content: <ClientProjectsTab clientId={client.id} projects={client.projects} />,
     },
     {
-      value: "accounts",
+      value: "akun",
       label: `Akun Login (${client.users.length})`,
       content: <ClientAccountsTab clientId={client.id} isActive={client.isActive} users={client.users} />,
     },
