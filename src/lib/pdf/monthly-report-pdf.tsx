@@ -11,7 +11,7 @@ import { compareWithPreviousMonth, formatNumber } from "@/lib/website-stats";
 // Sama dengan warna masa aktif di aplikasi: kuning <= 30 hari, merah <= 7 hari atau sudah lewat.
 const renewalColors: Record<RenewalTone, string> = {
   neutral: pdfColors.muted,
-  warning: "#9a6a00",
+  warning: pdfColors.warning,
   danger: pdfColors.danger,
 };
 

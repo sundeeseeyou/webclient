@@ -10,6 +10,7 @@ export const pdfColors = {
   border: "#e5e7eb",
   surface: "#f6f7f8",
   success: "#147a35",
+  warning: "#9a6a00",
   danger: "#c0381a",
 };
 
