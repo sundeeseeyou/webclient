@@ -56,3 +56,33 @@ Keputusan yang menyimpang dari PRD (`docs/prd-web.md`) atau mengisi hal yang tid
 | 41 | Email notifikasi dikirim lewat REST API Resend memakai `fetch`, tanpa SDK `resend` | Menghindari library baru. Tanpa `RESEND_API_KEY`/`EMAIL_FROM` hanya notifikasi di aplikasi, dan gagal kirim email tidak membatalkan notifikasi. |
 | 42 | API mengembalikan 401 bila belum login, 403 bila role salah, dan 404 untuk data milik klien lain | 404 dipakai sesuai PRD 4 agar keberadaan data klien lain tidak bocor. |
 | 43 | Fase 1 dikerjakan paralel oleh tiga agent di git worktree terpisah, masing-masing dengan database sendiri (`boowat_a`, `boowat_b`, `boowat_c`), lalu digabung ke `main` | Permintaan pemilik proyek. Database terpisah mencegah seed ulang satu agent menghapus data uji agent lain. |
+
+## Fase 1 — PB-01 Kelola Klien
+
+| No | Keputusan | Alasan |
+|---|---|---|
+| 44 | Akun login di form "Tambah Klien" bersifat opsional (checkbox "Buatkan akun login", aktif secara default). Klien dan akunnya disimpan dalam satu transaksi. | PRD 7.2 meminta form klien sekaligus akun login, tapi klien bisa saja dicatat sebelum membutuhkan akses. |
+| 45 | Email login yang sudah dipakai mengembalikan 409 dengan pesan "Email sudah dipakai akun lain" di kolom email login. Email dicek lebih dulu, lalu error unik Prisma (P2002) juga ditangkap untuk request bersamaan. | BB-06. Uji 4 request serentak dengan email sama: satu tersimpan, tiga ditolak, tidak ada data klien yatim. |
+| 46 | Email kontak klien (`Client.email`) tidak harus unik dan terpisah dari email login. | Satu PIC bisa mengurus beberapa perusahaan; yang harus unik hanya email login (`User.email`). |
+| 47 | Kolom "Password awal" ditampilkan sebagai teks biasa. | Admin perlu memeriksa password sebelum menyampaikannya ke klien. |
+| 48 | Menonaktifkan klien memakai DELETE (soft delete `isActive=false`); mengaktifkan kembali memakai PATCH `{ isActive: true }`. Klien nonaktif tetap tampil di daftar dengan badge "Nonaktif". | PRD 8. Data riwayat klien tetap tersimpan. |
+| 49 | Sesi klien yang sedang berjalan langsung berakhir begitu kliennya dinonaktifkan: callback `jwt` Auth.js memeriksa `Client.isActive` di setiap request klien dan menghapus sesi bila tidak aktif. | Tanpa ini klien nonaktif tetap bisa memakai portal sampai sesinya habis (30 hari). Biayanya satu query ringan per request klien. |
+| 50 | Pencarian klien hanya berdasarkan nama PIC dan nama perusahaan, tanpa paginasi. | PRD 7.2; jumlah klien agency masih puluhan. |
+| 51 | Tab di detail klien disimpan di `?tab=` memakai `history.replaceState`. | Tautan bisa dibagikan tanpa menambah riwayat tombol Back. |
+| 52 | Tab "Akun Login" hanya bisa menambah akun; ubah, hapus, dan reset password belum dibuat. | Di luar daftar API PRD 8. |
+
+## Fase 1 — PB-04 Data Website
+
+| No | Keputusan | Alasan |
+|---|---|---|
+| 53 | Domain dinormalkan: huruf kecil, tanpa `http(s)://` dan `/` di akhir (awalan `www.` tidak dibuang). Domain yang sudah terdaftar mengembalikan 409. | Kolom `domain` unik di schema. |
+| 54 | Pemilik website bisa dipindah ke klien lain yang aktif lewat form ubah. | Menangani salah input tanpa harus menghapus data statistik website. |
+| 55 | Kunci anti-dobel pengingat perpanjangan memuat tanggal jatuh tempo: `renew:{websiteId}:{domain|hosting}:{30|7}:{YYYY-MM-DD}`, lalu `:{userId}` ditambahkan oleh `notifyUsers`. | Tanpa tanggal, pengingat untuk periode tahun berikutnya tidak akan pernah terkirim karena kuncinya sudah terpakai. |
+| 56 | Tahap pengingat: sisa 8–30 hari masuk tahap 30; sisa ≤7 hari (termasuk yang sudah lewat) masuk tahap 7. Setiap tahap terkirim sekali, hanya untuk website milik klien aktif. | PRD 6.5. Cron yang terlewat sehari tetap mengirim pengingat di hari berikutnya. |
+| 57 | Klien hanya melihat artikel berstatus Terbit, juga lewat API. Artikel Terbit tanpa tanggal disimpan dengan tanggal hari ini. | Draf adalah pekerjaan internal agency. |
+| 58 | Statistik bulanan: bulan tidak boleh melewati bulan berjalan (WIB), isian kosong ditolak (bukan disimpan sebagai 0), dan nilai maksimal 1 miliar. | `z.coerce` mengubah isian kosong menjadi 0, yang akan tampil sebagai data palsu. |
+| 59 | Pageview disebut "Tampilan halaman" di seluruh UI, termasuk admin. | Konsisten Bahasa Indonesia (PRD 15.1). |
+| 60 | Sinkron WordPress mengambil maksimal 100 post terbaru tanpa paginasi. Tanggal post dibaca sebagai WIB, judul dibersihkan dari tag dan entity HTML, dan kegagalan mengembalikan 502 dengan pesan ramah. Artikel WordPress yang dihapus manual akan muncul lagi pada sinkron berikutnya. | Cukup untuk MVP; upsert berdasarkan id post WordPress. |
+| 61 | Sinkron GA4 hanya untuk bulan berjalan, dan hasilnya menimpa input manual bulan itu (sumber GA4). Adapter memakai JWT service account yang ditandatangani `node:crypto`, tanpa library Google. Belum diuji dengan kredensial asli. | PRD 6.5; tanpa kredensial, adapter langsung selesai tanpa request. |
+| 62 | Grafik pengunjung berupa batang tunggal tanpa animasi. Bulan tanpa data tidak diberi batang dan tooltip-nya "Belum ada data"; label sumbu dua baris agar 6 bulan muat di layar 360px. | PRD 15.1: tanpa angka dummy dan tanpa animasi. |
+| 63 | Di dashboard klien, proyek aktif (status selain Selesai) tampil di kartu website masing-masing, sedangkan banner "menunggu persetujuan" mencakup semua proyek klien. Perbandingan dengan bulan lalu disembunyikan bila data bulan lalu kosong. Warna kartu mengikuti masa aktif yang paling mendesak. | PRD 7.3. |
