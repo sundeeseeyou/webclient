@@ -1,5 +1,5 @@
 import type { IconType } from "react-icons";
-import { PiFileText, PiKanban, PiSquaresFour, PiTray, PiUsers } from "react-icons/pi";
+import { PiFileText, PiKanban, PiReceipt, PiSquaresFour, PiTray, PiUsers } from "react-icons/pi";
 import { navLabels } from "@/lib/labels";
 
 // Disimpan di modul biasa (bukan "use client") agar nilainya bisa dibaca server component.
@@ -20,11 +20,13 @@ export const navItems: Record<Portal, NavItem[]> = {
     { href: "/admin/clients", label: navLabels.clients, icon: PiUsers },
     { href: "/admin/projects", label: navLabels.projects, icon: PiKanban },
     { href: "/admin/requests", label: navLabels.requests, icon: PiTray },
+    { href: "/admin/invoices", label: navLabels.invoices, icon: PiReceipt },
   ],
   portal: [
     { href: "/portal", label: navLabels.dashboard, icon: PiSquaresFour },
     { href: "/portal/projects", label: navLabels.projects, icon: PiKanban },
     { href: "/portal/requests", label: navLabels.requests, icon: PiTray },
+    { href: "/portal/invoices", label: navLabels.invoices, icon: PiReceipt },
     { href: "/portal/reports", label: navLabels.reports, icon: PiFileText },
   ],
 };
