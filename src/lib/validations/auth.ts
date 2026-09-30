@@ -1,8 +1,9 @@
 import { z } from "zod";
 import { authText } from "@/lib/labels";
+import { emailField } from "@/lib/validations/common";
 
 export const loginSchema = z.object({
-  email: z.string().trim().toLowerCase().min(1, authText.emailRequired).pipe(z.email(authText.emailInvalid)),
+  email: emailField,
   password: z.string().min(1, authText.passwordRequired),
 });
 
