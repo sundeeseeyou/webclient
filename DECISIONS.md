@@ -36,3 +36,23 @@ Keputusan yang menyimpang dari PRD (`docs/prd-web.md`) atau mengisi hal yang tid
 | 28 | Cek grep PRD 15.4 #1 mengecualikan nilai enum `TaskStatus.TODO`; yang dicari hanya komentar TODO (`//.*TODO`) | `TODO` adalah nilai enum dari schema PRD dan pasti muncul di kode kanban. |
 | 29 | Cek emoji PRD 15.4 #2 dijalankan dengan Node, bukan `grep -P` | `grep -P` di Git Bash Windows salah membaca pola `\x{...}` sehingga semua baris dianggap cocok. |
 | 30 | `prisma/seed.mts` dibiarkan lebih dari 200 baris | Isinya hampir seluruhnya data demo. Batas 200 baris di PRD 15.3 ditujukan untuk file halaman dan komponen. |
+
+## Fase 1 — Desain ulang (docs/req-update.md) dan fondasi
+
+`docs/req-update.md` adalah permintaan tambahan dari pemilik proyek. Bila bertentangan dengan PRD 15.1, yang dipakai adalah req-update.
+
+| No | Keputusan | Alasan |
+|---|---|---|
+| 31 | Layout meniru TailAdmin: sidebar putih dengan label "MENU" yang bisa diciutkan (statusnya disimpan di cookie `sidebar-collapsed` agar tidak berkedip saat reload), header berisi tombol sidebar, lonceng, dan menu pengguna, serta konten `max-w-7xl` di tengah | req-update Desain #1. Fitur TailAdmin yang tidak berfungsi di MVP (pencarian, dark mode) tidak ikut dibuat. |
+| 32 | Radius 8px untuk tombol/input, 12px untuk kartu/dialog; `shadow-xs` untuk kartu/input, `shadow-sm` untuk dialog/popover | req-update Desain #2 menggantikan aturan `rounded-md` tanpa bayangan di PRD 15.1. |
+| 33 | Font heading **Gabarito**, isi **Plus Jakarta Sans** | req-update menulis "Gabarino", yang tidak ada di Google Fonts; dianggap salah ketik dari Gabarito. |
+| 34 | Ikon memakai `react-icons/pi` (Phosphor); `lucide-react` dihapus dan ikon di komponen shadcn diganti manual | req-update Desain #4. `components.json` masih menyebut lucide, jadi komponen shadcn yang ditambah nanti harus diganti ikonnya secara manual. |
+| 35 | Halaman login side-by-side: form di kiri, panel warna primary di kanan (disembunyikan di bawah 1024px) | req-update Desain #5. Panel hanya berisi deskripsi fungsional aplikasi, tanpa teks marketing (PRD 15.1). |
+| 36 | Transisi modal, sheet, popover, dropdown, dan select ditulis sebagai CSS keyframes di `globals.css`, berdasarkan atribut `data-slot`/`data-state` Radix; menghormati `prefers-reduced-motion` | req-update UI/UX #2 meminta modal dengan transisi halus. Tanpa library animasi, dan elemen halaman biasa tetap tanpa animasi masuk (PRD 15.1). Menggantikan keputusan #22 khusus untuk overlay. |
+| 37 | Logo sementara berupa kotak "B" (primary dengan huruf secondary) + teks Boowat | Pengganti logo sampai file logo tersedia (lanjutan #21). Secondary juga dipakai sebagai aksen di panel login. Menu aktif memakai tint primary ala TailAdmin, menggantikan garis secondary di #20. |
+| 38 | Library tambahan: `react-icons` (req-update), `sonner` untuk toast berhasil/gagal, dan `recharts` (PRD), semuanya dipasang di awal Fase 1 | `sonner` dipakai karena umpan balik setelah menyimpan adalah kebutuhan UX dasar (req-update UI/UX #1) dan merupakan toast yang direkomendasikan shadcn/ui. Semua library dipasang sekaligus agar lockfile tidak bentrok saat fitur dikerjakan paralel. |
+| 39 | Validasi form: skema Zod per entitas di `lib/validations/`, dengan helper bersama di `common.ts` dan pesan bawaan Zod berbahasa Indonesia (`z.locales.id`) | req-update UI/UX #3. Skema dibuat idempoten: tanggal tetap string `YYYY-MM-DD` dan diubah ke `Date` di route handler, karena form memvalidasi di browser lalu API memvalidasi ulang. |
+| 40 | Lonceng notifikasi kini bisa diklik (menandai dibaca lalu membuka tautannya), punya "Tandai semua dibaca", dan diperbarui tiap 30 detik saat tab aktif | Menggantikan #26 setelah API `/api/notifications` dibuat. Tidak realtime, sesuai PRD 2.2. |
+| 41 | Email notifikasi dikirim lewat REST API Resend memakai `fetch`, tanpa SDK `resend` | Menghindari library baru. Tanpa `RESEND_API_KEY`/`EMAIL_FROM` hanya notifikasi di aplikasi, dan gagal kirim email tidak membatalkan notifikasi. |
+| 42 | API mengembalikan 401 bila belum login, 403 bila role salah, dan 404 untuk data milik klien lain | 404 dipakai sesuai PRD 4 agar keberadaan data klien lain tidak bocor. |
+| 43 | Fase 1 dikerjakan paralel oleh tiga agent di git worktree terpisah, masing-masing dengan database sendiri (`boowat_a`, `boowat_b`, `boowat_c`), lalu digabung ke `main` | Permintaan pemilik proyek. Database terpisah mencegah seed ulang satu agent menghapus data uji agent lain. |
