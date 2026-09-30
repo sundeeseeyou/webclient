@@ -1,5 +1,6 @@
 import { fail, ok } from "@/lib/api";
 import { syncGa4Stats } from "@/lib/integrations/ga4";
+import { markOverdueInvoices } from "@/lib/invoice-overdue";
 import { sendRenewalReminders } from "@/lib/renewal-reminders";
 
 // Vercel Cron memanggil endpoint ini tanpa session, dengan header Authorization berisi CRON_SECRET.
@@ -15,6 +16,7 @@ export async function GET(request: Request) {
   const now = new Date();
   const renewalReminders = await sendRenewalReminders(now);
   const ga4 = await syncGa4Stats(now);
+  const invoicesOverdue = await markOverdueInvoices(now);
 
-  return ok({ ranAt: now.toISOString(), renewalReminders, ga4 });
+  return ok({ ranAt: now.toISOString(), renewalReminders, ga4, invoicesOverdue });
 }
