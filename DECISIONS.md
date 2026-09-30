@@ -104,3 +104,15 @@ Keputusan yang menyimpang dari PRD (`docs/prd-web.md`) atau mengisi hal yang tid
 | 74 | Portal klien memakai istilah "Tahapan Pekerjaan" (sprint) dan "pekerjaan" (task), dengan kalimat penjelas per status proyek. Detail task tidak ditampilkan ke klien. | PRD 7.3 dan aturan bahasa non-teknis di portal klien. |
 | 75 | Kunci tab di URL memakai Bahasa Indonesia (`?tab=website|proyek|akun`, `?tab=ringkasan|sprint|pesan`), disimpan lewat `history.replaceState`. | Konsisten antar halaman; tautan notifikasi bisa langsung membuka tab tertentu. |
 | 76 | Halaman detail di portal klien tidak memakai `loading.tsx`; skeleton dashboard ada di route group `portal/(home)` dan skeleton daftar proyek di `portal/projects/(list)`. | `loading.tsx` memulai streaming sebelum `notFound()` dipanggil, sehingga halaman "tidak ditemukan" terkirim dengan status 200. Portal klien adalah batas keamanan BB-04, jadi harus mengembalikan 404 asli. Detail di portal admin tetap memakai skeleton (soft 404 dapat diterima untuk admin). |
+
+## Fase 2 — Fondasi
+
+| No | Keputusan | Alasan |
+|---|---|---|
+| 77 | Target SLA memakai jam kalender (URGENT 4 jam, HIGH 1 hari, MEDIUM 3 hari, LOW 5 hari), disimpan di `lib/sla.ts`. | PRD 6.1 meminta hari kalender untuk MVP dan meminta keputusan ini dicatat. |
+| 78 | Alur status permintaan mengikuti activity diagram secara ketat: `SUBMITTED → IN_REVIEW → APPROVED → IN_PROGRESS → DONE`; penolakan hanya dari `IN_REVIEW`. Transisi lain ditolak (400). | PRD 6.1. Admin harus meninjau dulu sebelum menyetujui atau menolak. |
+| 79 | Invoice terlambat dihitung mulai hari setelah jatuh tempo (jatuh tempo 14 Okt → terlambat mulai 15 Okt 00:00 WIB). | Tanggal jatuh tempo masih termasuk hari pembayaran. |
+| 80 | Invoice OVERDUE tetap bisa ditandai lunas atau dibatalkan. | PRD 6.4 hanya menyebut DRAFT/SENT, padahal OVERDUE adalah invoice SENT yang terlambat; tanpa ini invoice terlambat tidak bisa diselesaikan. |
+| 81 | Nomor invoice diambil dari nomor terbesar dengan prefiks bulan yang sama; bila dua invoice dibuat bersamaan dan nomornya bentrok, penyimpanan diulang. | Kolom `number` unik di schema; urutan per bulan sesuai PRD 6.4. |
+| 82 | PDF memakai font bawaan Helvetica dan kerangka bersama di `src/lib/pdf/` (header logo, footer nomor halaman). Gaya halaman PDF tidak memakai `lineHeight`. | Tanpa file font tambahan. `lineHeight` membuat react-pdf menaruh nomor halaman di luar kertas (sudah diuji). |
+| 83 | Fase 2 kembali dikerjakan paralel oleh tiga agent (Invoice, Permintaan + persetujuan, Dashboard admin + laporan bulanan) dengan kontrak URL filter yang disepakati di awal: `/admin/requests?status=&priority=&clientId=&overdue=1`, `/admin/invoices?status=<status|unpaid>&clientId=`. | Dashboard admin menaut ke halaman milik agent lain. |
