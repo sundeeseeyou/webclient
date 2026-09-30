@@ -21,14 +21,11 @@ export function RequestTable({ requests, showClient = true }: RequestTableProps)
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/40 hover:bg-muted/40">
-            <TableHead>Judul</TableHead>
-            {showClient && <TableHead>Klien</TableHead>}
-            <TableHead>Website</TableHead>
-            <TableHead>Jenis</TableHead>
+            <TableHead>Permintaan</TableHead>
+            <TableHead>{showClient ? "Klien & Website" : "Website"}</TableHead>
             <TableHead>Prioritas</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Batas respon</TableHead>
-            <TableHead>Dibuat</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -36,15 +33,21 @@ export function RequestTable({ requests, showClient = true }: RequestTableProps)
             const href = `/admin/requests/${request.id}`;
             return (
               <TableLinkRow key={request.id} href={href}>
-                <TableCell className="min-w-56 whitespace-normal">
+                <TableCell className="min-w-60 whitespace-normal">
                   <Link href={href} className="font-medium transition-colors hover:text-primary">
                     {request.title}
                   </Link>
-                  {request.project && <p className="text-xs text-muted-foreground">Proyek: {request.project.name}</p>}
+                  <p className="text-xs text-muted-foreground">
+                    {requestTypeLabels[request.type]}
+                    {request.project && ` · Proyek ${request.project.name}`}
+                  </p>
                 </TableCell>
-                {showClient && <TableCell>{request.client.company}</TableCell>}
-                <TableCell>{request.website?.domain ?? "-"}</TableCell>
-                <TableCell>{requestTypeLabels[request.type]}</TableCell>
+                <TableCell>
+                  {showClient && <p>{request.client.company}</p>}
+                  <p className={showClient ? "text-xs text-muted-foreground" : undefined}>
+                    {request.website?.domain ?? "Tanpa website"}
+                  </p>
+                </TableCell>
                 <TableCell>{requestPriorityLabels[request.priority]}</TableCell>
                 <TableCell>
                   <div className="flex flex-col items-start gap-1">
@@ -52,8 +55,10 @@ export function RequestTable({ requests, showClient = true }: RequestTableProps)
                     {request.overdue && <OverdueBadge />}
                   </div>
                 </TableCell>
-                <TableCell>{formatDateTime(request.dueAt)}</TableCell>
-                <TableCell>{formatDate(request.createdAt)}</TableCell>
+                <TableCell>
+                  <p>{formatDateTime(request.dueAt)}</p>
+                  <p className="text-xs text-muted-foreground">Dibuat {formatDate(request.createdAt)}</p>
+                </TableCell>
               </TableLinkRow>
             );
           })}

@@ -4,9 +4,9 @@ import { requestPriorityLabels, requestStatusLabels, requestTypeLabels } from "@
 import type { RequestListItem } from "@/lib/requests";
 import { requestStatusTone } from "@/lib/status-tones";
 
-function InfoItem({ label, children }: { label: string; children: React.ReactNode }) {
+function InfoItem({ label, children, className }: { label: string; children: React.ReactNode; className?: string }) {
   return (
-    <div>
+    <div className={className}>
       <dt className="text-xs text-muted-foreground">{label}</dt>
       <dd className="mt-0.5">{children}</dd>
     </div>
@@ -29,13 +29,17 @@ export function RequestCard({ request }: { request: RequestListItem }) {
         </StatusBadge>
       </div>
 
-      <dl className="mt-4 grid gap-3 sm:grid-cols-3">
-        <InfoItem label="Diajukan">{formatDate(request.createdAt)}</InfoItem>
+      <dl className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <InfoItem label="Tanggal diajukan">{formatDate(request.createdAt)}</InfoItem>
         <InfoItem label="Prioritas">{requestPriorityLabels[request.priority]}</InfoItem>
         {request.respondedAt ? (
-          <InfoItem label="Direspons">{formatDateTime(request.respondedAt)}</InfoItem>
+          <InfoItem label="Direspons" className="col-span-2 sm:col-span-1">
+            {formatDateTime(request.respondedAt)}
+          </InfoItem>
         ) : (
-          <InfoItem label="Perkiraan waktu respon">Sebelum {formatDateTime(request.dueAt)}</InfoItem>
+          <InfoItem label="Perkiraan waktu respon" className="col-span-2 sm:col-span-1">
+            Sebelum {formatDateTime(request.dueAt)}
+          </InfoItem>
         )}
       </dl>
 

@@ -81,7 +81,7 @@ export function RequestInfoCard({ request }: RequestInfoCardProps) {
           <InfoItem label="Prioritas">
             {requestPriorityLabels[request.priority]} (target respon {slaTargetLabel(request.priority)})
           </InfoItem>
-          <InfoItem label="Diajukan">
+          <InfoItem label="Dibuat">
             {formatDateTime(request.createdAt)} oleh {request.createdBy.name}
           </InfoItem>
           <InfoItem label="Batas respon">
