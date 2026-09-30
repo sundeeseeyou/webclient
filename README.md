@@ -1,36 +1,70 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Boowat — Sistem Manajemen Proyek dan Klien
 
-## Getting Started
+Web app untuk web agency Boowat.com dengan dua portal:
 
-First, run the development server:
+- **Portal Admin** (`/admin`): kelola klien, website, proyek, sprint & task, invoice, dan permintaan klien.
+- **Portal Klien** (`/portal`): pantau website & proyek, ajukan permintaan, setujui hasil kerja, unduh invoice.
+
+Acuan kebutuhan: [`docs/prd-web.md`](docs/prd-web.md). Keputusan teknis: [`DECISIONS.md`](DECISIONS.md).
+
+## Kebutuhan
+
+- Node.js 24
+- pnpm 10
+- Docker (untuk PostgreSQL lokal)
+
+## Instalasi
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
+cp .env.example .env
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Isi `.env`:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Variabel | Keterangan |
+|---|---|
+| `DATABASE_URL` | Koneksi PostgreSQL. Nilai contoh sudah cocok dengan `docker-compose.yml`. |
+| `AUTH_SECRET` | Kunci acak untuk session, buat dengan `openssl rand -base64 32`. |
+| `CRON_SECRET` | Kunci acak untuk endpoint cron harian. |
+| `RESEND_API_KEY`, `EMAIL_FROM` | Opsional, untuk email notifikasi. |
+| `GA4_CLIENT_EMAIL`, `GA4_PRIVATE_KEY` | Opsional, untuk sinkron pengunjung dari Google Analytics. |
+| `APP_URL` | Alamat aplikasi, contoh `http://localhost:3000`. |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Database, migrasi, dan seed
 
-## Learn More
+```bash
+docker compose up -d          # PostgreSQL di localhost:5434
+pnpm prisma migrate dev       # buat tabel
+pnpm prisma db seed           # isi data demo (aman dijalankan ulang)
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Menjalankan
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+pnpm dev                      # http://localhost:3000
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Pemeriksaan sebelum commit:
 
-## Deploy on Vercel
+```bash
+pnpm typecheck
+pnpm lint
+pnpm build
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Akun demo
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Peran | Email | Password |
+|---|---|---|
+| Admin | `admin@boowat.com` | `admin123` |
+| Klien — Klinik Gigi Senyum Sehat | `klien1@contoh.com` | `klien123` |
+| Klien — CV Kopi Nusantara | `klien2@contoh.com` | `klien123` |
+| Klien — Batik Laras Solo | `klien3@contoh.com` | `klien123` |
+
+## Deploy ke Vercel
+
+1. Buat database PostgreSQL online (Neon atau Supabase), lalu salin connection string-nya.
+2. Import repo ini ke Vercel dan isi environment variable seperti di atas.
+3. Jalankan migrasi ke database production dengan `DATABASE_URL` production: `pnpm prisma migrate deploy`.
+4. Cron harian dibaca dari `vercel.json` (dibuat di Fase 1) dan memakai `CRON_SECRET`.
