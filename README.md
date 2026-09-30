@@ -67,4 +67,4 @@ pnpm build
 1. Buat database PostgreSQL online (Neon atau Supabase), lalu salin connection string-nya.
 2. Import repo ini ke Vercel dan isi environment variable seperti di atas.
 3. Jalankan migrasi ke database production dengan `DATABASE_URL` production: `pnpm prisma migrate deploy`.
-4. Cron harian dibaca dari `vercel.json` (dibuat di Fase 1) dan memakai `CRON_SECRET`.
+4. Cron harian (`vercel.json`, pukul 08:00 WIB) memanggil `/api/cron/daily` dengan header `Authorization: Bearer CRON_SECRET` untuk pengingat perpanjangan domain/hosting dan sinkron GA4.
