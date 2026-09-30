@@ -56,8 +56,11 @@ export const websiteSchema = z.object({
 export type WebsiteInput = z.input<typeof websiteSchema>;
 export type WebsiteValues = z.output<typeof websiteSchema>;
 
+// Isian kosong ditolak dulu, karena z.coerce mengubah "" menjadi 0 yang terlihat seperti data asli.
 function countField(label: string) {
-  return wholeNumber(label).max(MAX_COUNT, `${label} terlalu besar`);
+  return z
+    .custom<unknown>((value) => (typeof value === "string" ? value.trim() !== "" : value != null), `${label} wajib diisi`)
+    .pipe(wholeNumber(label).max(MAX_COUNT, `${label} terlalu besar`));
 }
 
 export const websiteStatSchema = z.object({
