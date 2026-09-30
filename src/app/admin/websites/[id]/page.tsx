@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { ArticleList } from "@/components/admin/websites/article-list";
+import { ReportDownloadDialog } from "@/components/admin/websites/report-download-dialog";
 import { StatForm } from "@/components/admin/websites/stat-form";
 import { WebsiteInfoCard } from "@/components/admin/websites/website-info-card";
 import { PageHeader } from "@/components/shared/page-header";
@@ -8,6 +9,7 @@ import { WebsiteStatTable } from "@/components/shared/website-stat-table";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toMonthInputValue } from "@/lib/dates";
 import { navLabels, platformLabels } from "@/lib/labels";
+import { defaultReportMonth, reportMonthOptions } from "@/lib/monthly-report";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/rbac";
 import { monthlySeries } from "@/lib/website-stats";
@@ -44,6 +46,13 @@ export default async function AdminWebsitePage({ params }: PageProps<"/admin/web
           { label: client.company, href: `/admin/clients/${client.id}` },
           { label: website.domain },
         ]}
+        actions={
+          <ReportDownloadDialog
+            website={{ id: website.id, domain: website.domain }}
+            months={reportMonthOptions(now)}
+            defaultMonth={defaultReportMonth(now)}
+          />
+        }
       />
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
         <WebsiteInfoCard website={info} clients={clientOptions} now={now} />
