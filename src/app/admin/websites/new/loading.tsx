@@ -1,5 +1,5 @@
 import { FormPageSkeleton } from "@/components/shared/form-page-skeleton";
 
 export default function Loading() {
-  return <FormPageSkeleton fields={5} />;
+  return <FormPageSkeleton fields={8} />;
 }
