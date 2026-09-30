@@ -27,13 +27,14 @@ export function ClientTabs({ tabs, initialTab }: ClientTabsProps) {
 
   return (
     <Tabs value={active} onValueChange={onValueChange} className="gap-4">
-      <div className="border-b">
-        <TabsList variant="line" className="h-auto gap-4 p-0">
+      {/* Di layar sempit deretan tab digeser ke samping agar halaman tidak ikut melebar. */}
+      <div className="overflow-x-auto border-b">
+        <TabsList variant="line" className="h-auto min-w-max gap-4 p-0">
           {tabs.map((tab) => (
             <TabsTrigger
               key={tab.value}
               value={tab.value}
-              className="flex-none rounded-none px-1 pt-1 pb-3 after:bg-primary group-data-[orientation=horizontal]/tabs:after:-bottom-px data-[state=active]:text-primary"
+              className="flex-none rounded-none px-1 pt-1 pb-3 after:bg-primary group-data-[orientation=horizontal]/tabs:after:bottom-0 data-[state=active]:text-primary"
             >
               {tab.label}
             </TabsTrigger>
