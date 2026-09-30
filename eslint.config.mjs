@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Worktree agent Claude Code berisi salinan repo lengkap.
+    ".claude/**",
   ]),
 ]);
 
