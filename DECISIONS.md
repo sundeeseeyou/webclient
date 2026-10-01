@@ -168,3 +168,13 @@ Keputusan yang menyimpang dari PRD (`docs/prd-web.md`) atau mengisi hal yang tid
 | 113 | Halaman form tambah website dan ajukan permintaan diberi skeleton lewat komponen bersama `FormPageSkeleton`. | PRD 15.4 #5: setiap halaman punya keadaan loading. |
 | 114 | Kode mati diaudit dengan `knip` yang dijalankan sekali lewat `pnpm dlx` (tidak dipasang). Ekspor yang tidak dipakai dihapus, atau kata `export`-nya dihapus bila hanya dipakai di file sendiri. Ekspor sisa di `components/ui/*` dibiarkan karena bagian komponen shadcn. `@auth/core` tetap dipasang (lihat #7) walau terdeteksi tidak terpakai. | PRD 15.3: tanpa kode mati dan library yang tidak dipakai. |
 | 115 | Migrasi database production dijalankan manual dari laptop (`prisma migrate deploy` dengan connection string direct), bukan otomatis saat build Vercel. | Build preview Vercel tidak boleh ikut mengubah database production. Koneksi pooled (PgBouncer) tidak cocok untuk migrasi. |
+
+## Penutupan — Logo dan favicon
+
+| No | Keputusan | Alasan |
+|---|---|---|
+| 116 | Dari dua varian logo yang diberikan, dipakai varian **blok putih di atas `#301193`**. Logo ini menggantikan kotak "B" sementara (#21, #37) di aplikasi, PDF, dan favicon. | Latarnya sama persis dengan warna primary, dan kontras putih di atasnya ±12,6:1 sehingga tetap jelas di favicon 16 px. Varian kedua (blok gradasi di atas `#f7f8f9`) menyatu dengan latar aplikasi dan tab browser terang, ujung biru mudanya hanya ±3,6:1, dan gradasi dilarang PRD 15.1. |
+| 117 | Di panel login berlatar primary, logo yang sama dipakai tanpa varian khusus. | Latar logo menyatu dengan panel, sehingga yang terlihat hanya blok putih. |
+| 118 | Favicon memakai konvensi metadata Next.js: `app/icon.png` (500 px), `app/apple-icon.png` (180 px), dan `app/favicon.ico` berisi PNG 16/32/48 px. Semuanya dibuat dari file logo, dan PNG di dalam ICO diberi kanal alpha. | Favicon bawaan Create Next App (logo Vercel) diganti. Decoder ICO Next.js menolak PNG tanpa kanal alpha. |
+| 119 | Logo di PDF disimpan sebagai data PNG base64 (128 px) di `src/lib/pdf/logo.ts`, bukan dibaca dari folder `public`. | Folder `public` tidak dijamin ada di dalam fungsi serverless Vercel, dan react-pdf tidak bisa menampilkan SVG. 128 px cukup tajam untuk dicetak pada ukuran 26 pt. |
+| 120 | Matcher `proxy.ts` mengecualikan file gambar statis (`.ico`, `.png`, `.svg`, `.jpg`, `.jpeg`, `.webp`). | Tanpa ini, logo dan ikon diarahkan ke `/login` (307) bagi pengunjung yang belum login, sehingga logo di halaman login tidak termuat. Halaman seperti `/admin` tetap terlindungi. |
