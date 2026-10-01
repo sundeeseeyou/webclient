@@ -56,6 +56,14 @@ pnpm test                     # unit test Vitest untuk lib/sla, lib/invoice, lib
 pnpm build
 ```
 
+Uji black-box BB-01 s.d. BB-22 lewat browser (butuh server berjalan dan data seed bersih):
+
+```bash
+node scripts/e2e/blackbox.mjs
+```
+
+Detailnya ada di [`scripts/e2e/README.md`](scripts/e2e/README.md).
+
 ## Akun demo
 
 | Peran | Email | Password |
@@ -90,4 +98,6 @@ pnpm build
 | [`docs/req-update.md`](docs/req-update.md) | Permintaan tambahan: desain dan UI/UX. |
 | [`DECISIONS.md`](DECISIONS.md) | Keputusan teknis dan penyesuaian terhadap PRD. |
 | [`docs/catatan-kode.md`](docs/catatan-kode.md) | File utama dan alur kode tiap fitur. |
-| [`docs/blackbox-checklist.md`](docs/blackbox-checklist.md) | Lembar uji black-box BB-01 s.d. BB-22. |
+| [`docs/blackbox-checklist.md`](docs/blackbox-checklist.md) | Lembar uji black-box BB-01 s.d. BB-22 beserta hasilnya. |
+| [`docs/bab4/hasil-pengujian.md`](docs/bab4/hasil-pengujian.md) | Draf BAB IV: hasil implementasi, Tabel Black-Box Testing, dan kerangka UAT. |
+| [`docs/bab4/uat-kuesioner.md`](docs/bab4/uat-kuesioner.md) | Perangkat UAT: skenario tugas, kuesioner Likert, rumus, dan lembar rekap. |
