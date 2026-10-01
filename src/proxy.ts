@@ -24,5 +24,6 @@ export default auth((req) => {
 });
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  // File gambar statis (logo, favicon, ikon) harus bisa dimuat sebelum login, misalnya di halaman login.
+  matcher: ["/((?!api|_next/static|_next/image|.*\\.(?:ico|png|svg|jpg|jpeg|webp)$).*)"],
 };

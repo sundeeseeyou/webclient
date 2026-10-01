@@ -1,4 +1,5 @@
-import { Text, View } from "@react-pdf/renderer";
+import { Image as PdfImage, Text, View } from "@react-pdf/renderer";
+import { PDF_LOGO } from "@/lib/pdf/logo";
 import { pdfColors } from "@/lib/pdf/theme";
 
 type PdfHeaderProps = {
@@ -20,19 +21,7 @@ export function PdfHeader({ title, subtitle }: PdfHeaderProps) {
       }}
     >
       <View style={{ flexDirection: "row", alignItems: "center" }}>
-        <View
-          style={{
-            width: 26,
-            height: 26,
-            borderRadius: 6,
-            backgroundColor: pdfColors.primary,
-            alignItems: "center",
-            justifyContent: "center",
-            marginRight: 8,
-          }}
-        >
-          <Text style={{ color: pdfColors.secondary, fontFamily: "Helvetica-Bold", fontSize: 14 }}>B</Text>
-        </View>
+        <PdfImage src={PDF_LOGO} style={{ width: 26, height: 26, borderRadius: 6, marginRight: 8 }} />
         <View>
           <Text style={{ fontFamily: "Helvetica-Bold", fontSize: 14 }}>Boowat</Text>
           <Text style={{ color: pdfColors.muted, fontSize: 9 }}>boowat.com</Text>

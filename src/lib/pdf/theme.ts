@@ -4,7 +4,6 @@ import { StyleSheet } from "@react-pdf/renderer";
 // Jangan pasang lineHeight di gaya halaman: react-pdf salah menghitung posisi teks dinamis (nomor halaman) sehingga keluar dari kertas.
 export const pdfColors = {
   primary: "#301193",
-  secondary: "#b5e41b",
   text: "#030303",
   muted: "#5b6169",
   border: "#e5e7eb",
