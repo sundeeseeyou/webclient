@@ -157,3 +157,14 @@ Keputusan yang menyimpang dari PRD (`docs/prd-web.md`) atau mengisi hal yang tid
 | 107 | Permintaan selesai di laporan = status DONE dengan tanggal selesai di bulan itu (WIB), milik website tersebut atau proyeknya, dan dibatasi klien pemilik website saat ini. Status proyek di laporan adalah status saat diunduh ("Status per {tanggal}"). | Riwayat status tidak disimpan. Pembatasan klien mencegah data klien lama bocor bila website dipindah (#54). |
 | 108 | Nilai kosong di laporan ditulis "Belum ada data"; perbandingan ditulis "Belum bisa dibandingkan" bila data bulan lalu kosong. | PRD 15.1: tanpa angka dummy. |
 | 109 | Tabel PDF tidak memotong baris antarhalaman; header tabel tidak diulang di halaman lanjutan. | Keterbatasan react-pdf yang dapat diterima untuk MVP. |
+
+## Fase 3 — Rapikan dan Uji
+
+| No | Keputusan | Alasan |
+|---|---|---|
+| 110 | Unit test memakai Vitest (environment `node`) di folder `tests/`, untuk empat file yang diminta PRD 11: `lib/sla.ts`, `lib/invoice.ts`, `lib/progress.ts`, `lib/rbac.ts`. `@types/node` dinaikkan ke versi 24. | Vitest 5 membutuhkan `@types/node` ≥ 22, dan runtime proyek sudah Node 24. |
+| 111 | `lib/rbac.ts` diuji dengan session tiruan (`vi.mock` untuk `@/lib/auth` dan `next/navigation`). | Aturan akses bisa diuji tanpa database dan tanpa login sungguhan. |
+| 112 | Halaman error berbahasa Indonesia di `app/error.tsx`, `app/admin/error.tsx`, `app/portal/error.tsx`, dan `app/global-error.tsx`. Isinya hanya kode kesalahan (digest), bukan pesan asli, dengan tombol "Coba lagi" yang memakai `retry()` Next 16. | Tanpa ini error server tampil dengan pesan bawaan Next berbahasa Inggris (PRD 15.1). Pesan asli bisa membocorkan detail teknis. Diuji dengan mematikan database lalu menyalakannya kembali. |
+| 113 | Halaman form tambah website dan ajukan permintaan diberi skeleton lewat komponen bersama `FormPageSkeleton`. | PRD 15.4 #5: setiap halaman punya keadaan loading. |
+| 114 | Kode mati diaudit dengan `knip` yang dijalankan sekali lewat `pnpm dlx` (tidak dipasang). Ekspor yang tidak dipakai dihapus, atau kata `export`-nya dihapus bila hanya dipakai di file sendiri. Ekspor sisa di `components/ui/*` dibiarkan karena bagian komponen shadcn. `@auth/core` tetap dipasang (lihat #7) walau terdeteksi tidak terpakai. | PRD 15.3: tanpa kode mati dan library yang tidak dipakai. |
+| 115 | Migrasi database production dijalankan manual dari laptop (`prisma migrate deploy` dengan connection string direct), bukan otomatis saat build Vercel. | Build preview Vercel tidak boleh ikut mengubah database production. Koneksi pooled (PgBouncer) tidak cocok untuk migrasi. |

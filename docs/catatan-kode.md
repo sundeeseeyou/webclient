@@ -225,3 +225,18 @@ Pola setiap fitur: **halaman** (server component, membaca Prisma) → **komponen
 2. Route: `requireApiUser()` → validasi parameter → `getMonthlyReport()` dengan filter `clientScope(user)` (website klien lain → 404).
 3. Batas bulan dihitung dalam WIB. Query mengambil statistik bulan itu dan bulan lalu, artikel terbit, permintaan selesai, proyek aktif + progres, serta tanggal perpanjangan.
 4. `pdfResponse(createElement(MonthlyReportDocument, …))` → browser mengunduh `Laporan-{domain}-{YYYY-MM}.pdf`.
+
+## Pengujian (Fase 3)
+
+**Unit test (`pnpm test`)**
+
+| File | Yang diuji |
+|---|---|
+| `tests/sla.test.ts` | Target SLA per prioritas dan labelnya, `computeDueAt` (BB-12: Tinggi = +1 hari), semua transisi status yang boleh dan tidak boleh, cek melewati SLA (BB-15). |
+| `tests/invoice.test.ts` | Format nomor `INV/YYYY/MM/NNNN` (bulan dihitung dalam WIB), lanjutan urutan per bulan, total dari item tanpa selisih pembulatan, batas jatuh tempo, status efektif OVERDUE, aksi kirim/lunas/batal, status yang terlihat klien (BB-21). |
+| `tests/progress.test.ts` | Progres 0% tanpa task, pembulatan, perhitungan lintas sprint, progres naik saat task selesai (BB-09). |
+| `tests/rbac.test.ts` | Pengalihan halaman sesuai role (BB-03), 401/403 di route handler, klien selalu dibatasi `clientId` dari session (BB-04). |
+
+**Uji black-box:** lembar uji manual ada di `docs/blackbox-checklist.md`.
+
+**Halaman error:** `src/components/shared/error-state.tsx` dipakai `app/error.tsx`, `app/admin/error.tsx`, `app/portal/error.tsx`, dan `app/global-error.tsx`. Error di halaman admin/portal tetap menampilkan sidebar. Tombol "Coba lagi" memanggil `retry()`, yang mengambil ulang data dari server.
