@@ -11,13 +11,16 @@ export default async function LoginPage() {
   return (
     <main className="flex min-h-screen bg-card">
       <section className="flex w-full flex-col px-6 py-8 sm:px-10 lg:w-1/2">
-        <Wordmark />
+        {/* Logo dan footer hanya di layar kecil; di desktop keduanya sudah tampil di panel kanan. */}
+        <div className="lg:hidden">
+          <Wordmark />
+        </div>
         <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center py-10">
           <h1 className="text-2xl font-semibold">{authText.title}</h1>
           <p className="mt-2 text-muted-foreground">{authText.subtitle}</p>
           <LoginForm />
         </div>
-        <p className="text-xs text-muted-foreground">Boowat.com</p>
+        <p className="text-xs text-muted-foreground lg:hidden">Boowat.com</p>
       </section>
       <section className="hidden w-1/2 flex-col justify-between bg-primary px-12 py-8 lg:flex">
         <Wordmark onPrimary />
